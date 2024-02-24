@@ -1,2 +1,2 @@
-# COMP360H_hw_1
+# Project #1 (COMP360H)
 fuck u nishant
