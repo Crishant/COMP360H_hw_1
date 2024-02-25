@@ -1,5 +1,3 @@
-TODO: Ask Professor how flexible are the parser and lexer in terms of spaces...
-
 function main() {
 
   var a ;

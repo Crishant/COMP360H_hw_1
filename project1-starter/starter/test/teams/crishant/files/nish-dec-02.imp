@@ -1,7 +1,8 @@
 function main() {
-  var x ;
+  var x, y = 2;
 
   print_int(x) ;
+  print_int(y) ;
 
   return ;
 }
