@@ -1,0 +1,22 @@
+{
+  "file" : "nish-dec-01.imp",
+  "input" : [],
+  "output" : ["5"]
+}
+
+// TODO: Ask Professor Danner what should be the output in the below cases ?
+// (and for failing test (by design) of any kind)
+
+{
+  "file" : "nish-dec-02.imp",
+  "input" : [],
+  "output" : ["Undefined"]
+}
+
+{
+  "file" : "nish-dec-03.imp",
+  "input" : [],
+  "output" : ["Error"]
+}
+
+

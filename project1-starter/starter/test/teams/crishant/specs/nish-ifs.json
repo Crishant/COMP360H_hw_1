@@ -1,0 +1,59 @@
+{
+  "file" : "nish-if-01.imp",
+  "input" : ["5","6"],
+  "output" : ["false"]
+}
+
+{
+  "file" : "nish-if-01.imp",
+  "input" : ["5","5"],
+  "output" : ["true"]
+}
+
+{
+  "file" : "nish-if-02.imp",
+  "input" : ["5","5"],
+  "output" : ["5"]
+}
+
+{
+  "file" : "nish-if-02.imp",
+  "input" : ["4","5"],
+  "output" : ["4"]
+}
+
+{
+  "file" : "nish-if-02.imp",
+  "input" : ["7","5"],
+  "output" : ["5"]
+}
+
+{
+  "file" : "nish-if-02.imp",
+  "input" : ["7","5"],
+  "output" : ["5"]
+}
+
+{
+  "file" : "nish-if-03.imp",
+  "input" : ["12","420","69"],
+  "output" : ["12"]
+}
+
+{
+  "file" : "nish-if-03.imp",
+  "input" : ["69","69","69"],
+  "output" : ["true"]
+}
+
+{
+  "file" : "nish-if-03.imp",
+  "input" : ["12","12","-4"],
+  "output" : ["false"]
+}
+
+{
+  "file" : "nish-if-03.imp",
+  "input" : ["10000","1200","-4"],
+  "output" : ["1200"]
+}

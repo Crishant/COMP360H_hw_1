@@ -1,0 +1,10 @@
+function main() {
+  var x ;
+
+  x = 5 ;
+  x = x ;
+
+  print_int(x) ;
+
+  return ;
+}
