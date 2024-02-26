@@ -1,0 +1,12 @@
+{
+    "file" : "cristi-dec-02.imp",
+    "input" : ["4","5"],
+    "output" : ["1"]
+}
+
+{
+    "file" : "cristi-dec-02.imp",
+    "input" : ["4","-1"],
+    "output" : ["-4"]
+}
+
