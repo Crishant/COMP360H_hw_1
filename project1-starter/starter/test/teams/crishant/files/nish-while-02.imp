@@ -13,7 +13,7 @@ function main() {
     a = b ;
     b = b + 1;
 
-    if (b == 7) {
+    if (b == 7) then {
         a = 8;
     }
 

@@ -11,12 +11,12 @@ function main() {
     b = prompt_int("Enter b: ") ;
     c = prompt_int("Enter c: ") ;
 
-    if a - b <= 2 {
+    if a - b <= 2 then {
         print_bool (true);
         return;
     }
     else {
-       if c < 100 {
+       if c < 100 then {
             print_int(80085);
        }
        else {

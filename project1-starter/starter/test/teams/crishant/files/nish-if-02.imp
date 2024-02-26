@@ -10,7 +10,7 @@ function main() {
     a = b + 2;
   }
 
-  if a < b {
+  if a < b then {
     print_int(a) ;
   }
   else {
