@@ -1,6 +1,8 @@
 (* COMP 360H Project 1:  an interpreter for an imperative language.
  *
- * N. Danner
+ * Christian Diaz Herrera
+ * Cristina Gonzalez
+ * Nishant Aggarwal
  *)
 
 module E = Ast.Expression
@@ -170,6 +172,22 @@ module Api = struct
 
 
 end
+
+(* TODO: (Potentially) Write cases to throw exception where the values are undefined or none.
+ * TODO: (Potentially) Write cases to throw exception where the operator type doesnt make sense with the given Value types.
+ * The reason I have written "potentially" above is because if we have all of the `good` cases
+ * we may be able to ignore the `bad` cases by simply having one |_ -> failwith case. However, the
+ * drawback in this case would be that the user of the object language won't get much information
+ * about what went wrong.
+ *)
+let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
+  match (op, v, v') with
+  | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
+  | (E.Mod, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n mod n')
+  | (E.Eq, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n = n')
+  | (E.Ne, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n <> n')
+  | _ -> failwith @@ "Something went Wrong!"
+
 
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
