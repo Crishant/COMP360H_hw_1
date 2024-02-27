@@ -1,6 +1,13 @@
 
 {
-    "file":   "cristi-dec-04.imp",
+    "file":   "cristi-while-01.imp",
     "input":  [],
     "output": ["7"]
 }
+
+{
+    "file":   "cristi-while-02.imp",
+    "input":  [],
+    "output": ["-3"]
+}
+

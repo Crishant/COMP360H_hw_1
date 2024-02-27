@@ -2,5 +2,12 @@
 {
     "file":   "cristi-dec-01.imp",
     "input":  [],
-    "output": ["9","9"]
+    "output": ["9","2"]
+}
+
+
+{
+    "file":   "cristi-dec-02.imp",
+    "input":  [],
+    "output": ["jello"]
 }

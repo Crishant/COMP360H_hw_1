@@ -3,8 +3,8 @@ function main() {
   var b ;
   var c = 0;
 
-  a = prompt_int("Enter postive int a: ") ;
-  b = prompt_int("Enter b: ") ;
+  a = prompt_int("Enter a: ") ;
+  b = prompt_str("Enter b: ") ;
 
   if a < 0 then{
     print_str("a not postive int")
@@ -16,7 +16,7 @@ function main() {
   }
 
   while a != 0 do {
-    c = c +1;
+    c = c + 1;
     a = a-1;
   }
 

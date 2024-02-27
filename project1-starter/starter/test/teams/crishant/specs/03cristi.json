@@ -1,6 +1,14 @@
 
 {
-    "file":   "cristi-dec-03.imp",
+    "file":   "cristi-if-01.imp",
     "input":  [],
     "output": ["5"]
 }
+
+
+{
+    "file":   "cristi-if-02.imp",
+    "input":  [],
+    "output": ["success"]
+}
+

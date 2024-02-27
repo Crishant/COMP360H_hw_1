@@ -2,7 +2,7 @@ function main() {
     var x = 5;
     var y = false;
 
-    if y != true  then{
+    if y != true then{
         print_int(x);
     }
 

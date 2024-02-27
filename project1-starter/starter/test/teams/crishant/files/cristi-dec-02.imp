@@ -1,16 +1,6 @@
 function main() {
-  var a ;
-  var b ;
-  var f ;
+    var x = "jello";
+    var y = x;
 
-  a = prompt_int("Enter a number: ") ;
-  b = prompt_int("Enter another number: ") ;
-
-  if b > 0 && a > 0 then {
-    f = a % b ;
-  } else {
-    f = a * b;
-  }
-  print_int(f) ;
-  return ;
+    print_str(y);
 }
