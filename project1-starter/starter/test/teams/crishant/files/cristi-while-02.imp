@@ -3,11 +3,11 @@ function main() {
     var y = 2;
     var z = 2;
     
-    while x > 0 do {
+    while (x > 0) do {
         x = x - 1;
         y = y - 1;
         if (y == 1) then {
-            while(z > 0) do{
+            while (z > 0) do{
                 z = z - 1;
             }
         }
