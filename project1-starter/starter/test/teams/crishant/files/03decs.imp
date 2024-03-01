@@ -1,0 +1,9 @@
+function main(){
+    var x = 2;
+    var y = true;
+    var z = "hello";
+
+    print_str(z);
+    print_bool(y);
+    print_int(x);
+}

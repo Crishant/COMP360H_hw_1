@@ -1,0 +1,9 @@
+function main() {
+    var x = true;
+    var y = false;
+
+    print_bool(x || y);
+    print_bool(x && y);
+    print_bool(x == y);
+    print_bool(x == !y);
+}
