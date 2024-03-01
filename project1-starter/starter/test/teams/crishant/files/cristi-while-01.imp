@@ -8,5 +8,5 @@ function main() {
     }
 
     print_int(y);
-    return
+    return;
 }

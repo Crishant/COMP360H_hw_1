@@ -1,0 +1,12 @@
+function main() {
+    var y = false;
+
+    while y == true {
+        print_str("never reach")
+    }
+
+    print_bool(false);
+
+    return;
+    
+}

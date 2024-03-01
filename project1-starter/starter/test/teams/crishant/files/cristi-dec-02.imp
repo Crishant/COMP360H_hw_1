@@ -3,4 +3,6 @@ function main() {
     var y = x;
 
     print_str(y);
+
+    return;
 }

@@ -52,3 +52,28 @@
     "output" : ["14"]
 }
 
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["2","3"],
+    "output" : ["3"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["0","-2"],
+    "output" : ["-2"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["0","0"],
+    "output" : ["0"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["100","99"],
+    "output" : ["99"]
+}
+
+

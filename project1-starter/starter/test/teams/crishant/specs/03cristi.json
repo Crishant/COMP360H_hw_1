@@ -12,3 +12,10 @@
     "output": ["success"]
 }
 
+{
+    "file":   "cristi-if-03.imp",
+    "input":  [],
+    "output": ["1"]
+}
+
+

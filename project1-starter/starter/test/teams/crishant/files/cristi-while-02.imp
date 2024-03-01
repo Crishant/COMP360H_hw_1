@@ -14,5 +14,7 @@ function main() {
     }
 
     print_int(y);
-    return
+    print_int(x);
+    print_int(z);
+    return;
 }

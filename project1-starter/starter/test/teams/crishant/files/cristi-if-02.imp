@@ -1,6 +1,5 @@
 function main() {
     var x = 5;
-    var y = false;
 
     if (x <= 6) then{
         if x == 5 then{
