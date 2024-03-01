@@ -1,0 +1,20 @@
+
+{
+    "file":   "cristi-dec-01.imp",
+    "input":  [],
+    "output": ["9","2"]
+}
+
+
+{
+    "file":   "cristi-dec-02.imp",
+    "input":  [],
+    "output": ["jello"]
+}
+
+{
+    "file":   "cristi-dec-03.imp",
+    "input":  [],
+    "output": ["nuts","3","false"]
+}
+

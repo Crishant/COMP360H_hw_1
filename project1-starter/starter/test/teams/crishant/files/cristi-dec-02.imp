@@ -1,0 +1,8 @@
+function main() {
+    var x = "jello";
+    var y = x;
+
+    print_str(y);
+
+    return;
+}
