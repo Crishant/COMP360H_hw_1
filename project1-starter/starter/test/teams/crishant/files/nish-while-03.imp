@@ -1,0 +1,29 @@
+function main() {
+
+  var a ;
+  var b ;
+  var c ;
+
+  a = prompt_int("Enter a: ") ;
+  b = prompt_int("Enter b: ") ;
+  c = prompt_int("Enter c: ") ;
+
+  while ((a==b || a<b) && c > 0) do {
+
+    print_int(c) ;
+    print_int(a) ;
+    print_int(b) ;
+
+    b = a ;
+    a = c  ;
+    c = c - b ;
+
+
+    print_int(c) ;
+    print_int(a) ;
+    print_int(b) ;
+
+  }
+
+  return ;
+}
