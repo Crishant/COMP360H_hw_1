@@ -8,7 +8,7 @@ function main() {
 
   if a < 0 then{
     print_str("a not postive int")
-    a = 5
+    a = 5;
   }
 
   if b < a || b > 10 {
