@@ -196,7 +196,7 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Ne, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n <> n')
   | (E.Ne, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n <> n')
   | (E.Lt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n < n')
-  | (E. Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
+  | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
 
