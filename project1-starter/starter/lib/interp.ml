@@ -173,6 +173,10 @@ module Api = struct
 
 end
 
+
+module Env = struct 
+  type t = int
+end
 (* TODO: (Potentially) Write cases to throw exception where the values are undefined or none.
  * TODO: (Potentially) Write cases to throw exception where the operator type doesnt make sense with the given Value types.
  * The reason I have written "potentially" above is because if we have all of the `good` cases
@@ -199,28 +203,23 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
-  let rec eval (sigma : Frame.t) (e : E.t) : Value.t * Frame.t=
+  let rec eval (sigma : Env.t) (e : E.t) : Value.t * Env.t=
   (*! end !*)
     match e with
-    | E.Var x -> (Frame.lookup sigma x, sigma) 
-    | E.Num n -> (Value.V_Int n, sigma)
+    | E.Var x -> failwith @@ "Unimplemented"
+    | E.Num n -> failwith @@ "Unimplemented"
     | E.Bool n -> failwith @@ "Unimplemented"
     | E.Str n -> failwith @@ "Unimplemented"
-    | E.Binop (op, e, e') ->
-      let (v,sigma') = eval sigma e in
-      let (v',sigma2) = eval sigma' e' in
-      (binop op v v', sigma2)
+    | E.Binop (op, e, e') -> failwith @@ "Unimplemented"
     | E.Assign (x, v) -> failwith @@ "Unimplemented"
     | E.Not n -> failwith @@ "Unimplemented"
-    | E.Neg e ->
-      let (V_Int n, sigma') = eval sigma e in
-      (V_Int (-n), sigma')
-    | E.Call l -> failwith @@ "Unimplemented"
+    | E.Neg e -> failwith @@ "Unimplemented"
+    | E.Call (x,l) -> failwith @@ "Unimplemented"
 
-  and exec_stm(stm: S.t)(sigma: Frame.t): Frame.t = 
+  and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
   match stm with 
   | S.Skip -> failwith @@ "Unimplemented"
-  | S.Vardec l -> failwith @@ "Unimplemented"
+  | S.VarDec l -> failwith @@ "Unimplemented"
   | S.Expr e -> failwith @@ "Unimplemented"
   | S.Block l -> failwith @@ "Unimplemented"
   | S.If(e, s0, s1) -> failwith @@ "Unimplemented"
