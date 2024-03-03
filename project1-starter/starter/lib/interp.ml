@@ -183,8 +183,12 @@ end
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
   | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
+  | (E.Times, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n * n')
+  | (E.And, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n && n')
   | (E.Mod, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n mod n')
   | (E.Eq, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n = n')
+  | (E.Le, Value.V_Int n, Value.V_Int n') -> Value.V_Bool (n <= n')
+  | (E.Ge, Value.V_Int n, Value.V_Int n') -> Value.V_Bool (n >= n')
   | (E.Ne, Value.V_Bool n, Value.V_Bool n') -> Value.V_Bool (n <> n')
   | _ -> failwith @@ "Something went Wrong!"
 
