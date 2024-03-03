@@ -199,11 +199,38 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
+  let rec eval (sigma : Frame.t) (e : E.t) : Value.t * Frame.t=
+  (*! end !*)
+    match e with
+    | E.Var x -> (Frame.lookup sigma x, sigma) 
+    | E.Num n -> (Value.V_Int n, sigma)
+    | E.Bool n -> failwith @@ "Unimplemented"
+    | E.Str n -> failwith @@ "Unimplemented"
+    | E.Binop (op, e, e') ->
+      let (v,sigma') = eval sigma e in
+      let (v',sigma2) = eval sigma' e' in
+      (binop op v v', sigma2)
+    | E.Assign (x, v) -> failwith @@ "Unimplemented"
+    | E.Not n -> failwith @@ "Unimplemented"
+    | E.Neg e ->
+      let (V_Int n, sigma') = eval sigma e in
+      (V_Int (-n), sigma')
+    | E.Call l -> failwith @@ "Unimplemented"
 
+  and exec_stm(stm: S.t)(sigma: Frame.t): Frame.t = 
+  match stm with 
+  | S.Skip -> failwith @@ "Unimplemented"
+  | S.Vardec l -> failwith @@ "Unimplemented"
+  | S.Expr e -> failwith @@ "Unimplemented"
+  | S.Block l -> failwith @@ "Unimplemented"
+  | S.If(e, s0, s1) -> failwith @@ "Unimplemented"
+  | S.While(e, s) -> failwith @@ "Unimplemented"
+  | S.Return(e) -> failwith @@ "Unimplemented" 
+    
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
-let exec (_ : Ast.Program.t) : unit =
-  failwith "Unimplemented:  exec"
+  and exec (stm : Ast.Program.t) (sigma : Env.t) : Env.t =
+    failwith @@ "Unimplemented"
 
 
