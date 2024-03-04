@@ -206,20 +206,32 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   let rec eval (sigma : Env.t) (e : E.t) : Value.t * Env.t=
   (*! end !*)
     match e with
-    | E.Var x -> failwith @@ "Unimplemented"
+    | E.Var x -> (Env.lookup(sigma, x), sigma)
     | E.Num n -> failwith @@ "Unimplemented"
-    | E.Bool n -> failwith @@ "Unimplemented"
-    | E.Str n -> failwith @@ "Unimplemented"
+    | E.Bool b -> (Value.V_Bool b, sigma)
+    | E.Str s -> failwith @@ "Unimplemented"
     | E.Binop (op, e, e') -> failwith @@ "Unimplemented"
-    | E.Assign (x, v) -> failwith @@ "Unimplemented"
+    | E.Assign (x, e) -> 
+      let (v, sigma') = eval sigma e in 
+      let sigma2 = Env.vupd(sigma', x, v) in
+      (v, sigma2)
     | E.Not n -> failwith @@ "Unimplemented"
-    | E.Neg e -> failwith @@ "Unimplemented"
+    | E.Neg e -> 
+      let (V_Int n, sigma') = eval sigma e in 
+      (V_Int(-n), sigma')
     | E.Call (x,l) -> failwith @@ "Unimplemented"
 
   and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
   match stm with 
-  | S.Skip -> failwith @@ "Unimplemented"
-  | S.VarDec l -> failwith @@ "Unimplemented"
+  | S.Skip -> sigma
+  | S.VarDec l -> 
+    match l with 
+    |x :: xs -> match x with 
+      |y -> exec_stm S.t (xs) Env.vdec(y, sigma) 
+      | (y, e) -> 
+        let sigma' = Env.vdec(y, sigma) in
+          let (v, sigma2) = eval sigma' e in
+          exec_stm S.t (xs) sigma2
   | S.Expr e -> failwith @@ "Unimplemented"
   | S.Block l -> failwith @@ "Unimplemented"
   | S.If(e, s0, s1) -> failwith @@ "Unimplemented"
