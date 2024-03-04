@@ -207,19 +207,26 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   (*! end !*)
     match e with
     | E.Var x -> (Env.lookup(sigma, x), sigma)
-    | E.Num n -> failwith @@ "Unimplemented"
+    | E.Num n -> (Value.V_Int n, sigma)
     | E.Bool b -> (Value.V_Bool b, sigma)
-    | E.Str s -> failwith @@ "Unimplemented"
-    | E.Binop (op, e, e') -> failwith @@ "Unimplemented"
+    | E.Str s -> (Value.V_Str s, sigma)
+    | E.Binop (op, e, e') ->
+      let (v,sigma') = eval sigma e in
+      let (v',sigma2) = eval sigma' e' in
+        (binop op v v', sigma2)
     | E.Assign (x, e) -> 
       let (v, sigma') = eval sigma e in 
       let sigma2 = Env.vupd(sigma', x, v) in
       (v, sigma2)
-    | E.Not n -> failwith @@ "Unimplemented"
+    | E.Not b ->
+      match b with 
+      | Value.V_Bool b -> (not b, sigma)
+      |_ -> failwith @@ "Type Error"
     | E.Neg e -> 
       let (V_Int n, sigma') = eval sigma e in 
       (V_Int(-n), sigma')
     | E.Call (x,l) -> failwith @@ "Unimplemented"
+    (* send a program as an argument *)
 
   and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
   match stm with 
