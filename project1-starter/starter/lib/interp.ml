@@ -173,16 +173,110 @@ module Api = struct
 
 end
 
+(* The code for Env/Frame Stuffs
+*)
+module IdMap = Map.Make(Ast.Id)
 
-module Env = struct 
-  type t = int
-end
+    (* Stack Implementation using Lists.
+     * Source: http://wide.land/modules/ex_stacks.html
+     *
+     *)
+    module ListStack : Stack = struct
+      type 'a stack = 'a list
+
+      let empty = []
+      let is_empty s = s = []
+      let push x s = x :: s
+      let peek = function
+        | []   -> failwith @@ "Empty"
+        | x::_ -> x
+      let pop = function
+        | []    -> failwith @@ "Empty"
+        | _::xs -> xs
+    end
+
+
+    (* Environments.
+     *
+     * A value of type t is a map from identifiers to values.  We use σ to range
+     * over environments and standard function notation when describing them.
+     *)
+    module Env = struct
+
+      type t = frame ListStack.stack
+
+      type frame =
+      | FunctionFrame of bindingTable list
+      | ReturnFrame of Value.t
+
+      (* The type of environments.
+       *)
+      type bindingTable = Value.t IdMap.t
+
+      (*  lookup σ x = σ(x).
+       *)
+      let lookup (sigma : t) (x : Ast.Id.t) : Value.t =
+        let currFrame = sigma.peek in
+            match currFrame with
+            | FunctionFrame -> lookup' currFrame x
+            | ReturnFrame -> failwith @@ "Lookup in ReturnFrame"
+
+      let rec lookup' (currFrame : FunctionFrame) (x : Ast.Id.t) : Value.t =
+        match currFrame with
+          | [] -> raise UnboundVariable x
+          | y :: ys ->
+              try
+                  IdMap.find x y
+              with
+                  | Not_found -> lookup' ys x
+
+      (*  update σ x v = σ{x → v}.
+       *)
+      let update (sigma : t) (x : Ast.Id.t) (v : Value.t) : t =
+        let currFrame = sigma.peek in
+            match currFrame with
+            | FunctionFrame -> let varInFrame = varBounded currFrame x in
+                                match varInFrame with
+                                | true -> update' currFrame x t
+                                | false -> raise UnboundVariable x
+            | ReturnFrame -> failwith @@ "Update in a return Frame"
+
+      let rec update' (currFrame : FunctionFrame) (x : Ast.Id.t) (v : Value.t) : t =
+        match currFrame with
+        | [] -> raise UnboundVariable x
+        | y :: ys -> match lookup'
+
+      let varBounded (currFrame : FunctionFrame) (x : Ast.Id.t) : bool =
+        match currFrame with
+        | [] -> false
+        | y :: ys -> y.mem x y
+
+
+      (* Need to check arguments and return types for all of the below per inference rules*)
+      let VarDec (sigma : t) (x : Ast.Id.t) (v : Value.t) : Value.t =
+      failwith @@ "unimplemented"
+
+      let VarDec (sigma : t) (x : Ast.Id.t) : Value.t =
+      failwith @@ "unimplemented"
+
+      let AddFrame (sigma : t) : t =
+      failwith @@ "unimplemented"
+
+      let DropFrame (sigma : t) : t =
+      failwith @@ "unimplemented"
+
+      (*  empty = σ, where dom σ = ∅.
+       *)
+      let empty : t = IdMap.empty
+
+    end
+
 (* TODO: (Potentially) Write cases to throw exception where the values are undefined or none.
  * TODO: (Potentially) Write cases to throw exception where the operator type doesnt make sense with the given Value types.
- * The reason I have written "potentially" above is because if we have all of the `good` cases
- * we may be able to ignore the `bad` cases by simply having one |_ -> failwith case. However, the
- * drawback in this case would be that the user of the object language won't get much information
- * about what went wrong.
+ * The reason I h that the user of the object language won't get much information
+ * about what went wrong.ave written "potentially" above is because if we have all of the `good` cases
+                          * we may be able to ignore the `bad` cases by simply having one |_ -> failwith case. However, the
+                          * drawback in this case would be
  *)
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
