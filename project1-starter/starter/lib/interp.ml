@@ -7,7 +7,6 @@
 
 module E = Ast.Expression
 module S = Ast.Stm
-module F = Fun
 
 (* 'a IdentMap.t:  the type of maps from identifiers to 'a.
  *)
@@ -326,54 +325,47 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
 let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list = 
   match l1, l2 with 
   | [],[] -> []
-  | x::xs, y::ys -> (x,y) :: zip(xs, ys)
+  | x::xs, y::ys -> (x, y) :: zip xs ys
   | _ -> failwith @@ "No lists"
 
 
-  let rec stm_list (ss :S.t list)(Env.t) = Env.t = 
-    match ss with
-    | [] => sigma
-    | x::xs => 
-      let sigma' = exec_stm S.t (xs) sigma in
-        match sigma' with 
-        | Env.FunctionFrame -> 
-            let sigma2 = exec_stm S.t (xs) sigma' in 
-              sigma2
-        | Env.ReturnFrame -> 
-            sigma'
+  
 
-
-  let rec eval (sigma : Env.t) (e : E.t) (f: F.t) : Value.t * Env.t=
+  let rec eval (sigma : Env.t) (e : E.t) (f: Fun.t) : Value.t * Env.t =
     match e with
-    | E.Var x -> (Env.lookup(sigma, x), sigma)
+    | E.Var x -> (Env.lookup sigma x, sigma)
     | E.Num n -> (Value.V_Int n, sigma)
     | E.Bool b -> (Value.V_Bool b, sigma)
     | E.Str s -> (Value.V_Str s, sigma)
-    | E.Binop (op, e, e') ->
-      let (v,sigma') = eval sigma e in
-      let (v',sigma2) = eval sigma' e' in
-        (binop op v v', sigma2)
-    | E.Assign (x, e) -> 
-      let (v, sigma') = eval sigma e in 
-      let sigma2 = Env.vupd(sigma', x, v) in
+    | E.Binop (op, e1, e2) ->
+      let (v1, sigma1) = eval sigma e1 f in
+      let (v2, sigma2) = eval sigma1 e2 f in
+      (binop op v1 v2, sigma2)
+    | E.Assign (x, e) ->
+      let (v, sigma') = eval sigma e f in
+      let sigma2 = Env.update sigma' x v in
       (v, sigma2)
-    | E.Not b ->
-      match b with 
-      | Value.V_Bool b -> (not b, sigma)
-      |_ -> failwith @@ "Type Error"
-    | E.Neg e -> 
-      let (V_Int n, sigma') = eval sigma e in 
-      (V_Int(-n), sigma')
-    | E.Call (func,l) -> 
-      let (vl, sigma') = eval_all(l, sigma) in 
-      let (xl, sl) = F.findFunc(f, func) in 
+    | E.Not e ->
+      let (v, sigma') = eval sigma e f in
+      (match v with
+       | Value.V_Bool b -> (Value.V_Bool (not b), sigma')
+       | _ -> failwith "Type Error")
+    | E.Neg e ->
+      let (v, sigma') = eval sigma e f in
+      (match v with
+       | Value.V_Int n -> (Value.V_Int (-n), sigma')
+       | _ -> failwith "Type Error")
+    | E.Call (func, l) ->
+      let (vl, sigma') = eval_all (l, sigma) in
+      let (xl, sl) = F.findFunc f func in
       let xvl = zip xl vl in
-      let sigma2 = F.initfunc xvl in 
-      match exec_stm sl sigma2 with 
-      | Env.ReturnFrame v -> (v, sigma')
-      | _ -> failwith @@ "Not a return frame" 
+      let sigma2 = F.initfunc xvl in
+      (match exec_stm sl sigma2 with
+       | Env.ReturnFrame v -> (v, sigma')
+       | _ -> failwith "Not a return frame")
 
-  and eval_all(el: E.t list, sigma: Env.t) : Value.t list * Env.t = 
+
+  and eval_all(el: E.t list) (sigma: Env.t) : Value.t list * Env.t = 
   match el with 
   | [] -> ([], sigma)
   | x :: xs -> 
@@ -410,6 +402,19 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     match e  with
     | e ->  e
     |_ -> Value.V_None
+  
+  and stm_list (ss : S.t list)(sigma: Env.t) : Env.t = 
+    match ss with
+    | [] -> sigma
+    | x::xs -> 
+      let sigma' = exec_stm S.t (xs) sigma in
+        match sigma' with 
+        | Env.FunctionFrame -> 
+            let sigma2 = exec_stm S.t (xs) sigma' in 
+              sigma2
+        | Env.ReturnFrame -> 
+            sigma'
+
     
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
