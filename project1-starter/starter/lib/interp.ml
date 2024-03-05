@@ -341,8 +341,9 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
               sigma2
         | Env.ReturnFrame -> 
             sigma'
-  let rec eval (sigma : Env.t) (e : E.t) : Value.t * Env.t=
-  (*! end !*)
+
+
+  let rec eval (sigma : Env.t) (e : E.t) (f: F.t) : Value.t * Env.t=
     match e with
     | E.Var x -> (Env.lookup(sigma, x), sigma)
     | E.Num n -> (Value.V_Int n, sigma)
