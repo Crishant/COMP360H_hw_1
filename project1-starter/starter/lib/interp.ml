@@ -330,7 +330,6 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
   | _ -> failwith @@ "No lists"
 
 
-  let rec eval (sigma : Env.t) (e : E.t) (f: F.t) : Value.t * Env.t=
   let rec stm_list (ss :S.t list)(Env.t) = Env.t = 
     match ss with
     | [] => sigma
