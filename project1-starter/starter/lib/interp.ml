@@ -7,6 +7,7 @@
 
 module E = Ast.Expression
 module S = Ast.Stm
+module F = Fun
 
 (* 'a IdentMap.t:  the type of maps from identifiers to 'a.
  *)
@@ -230,7 +231,7 @@ module IdMap = Map.Make(Ast.Id)
             | FunctionFrame currFrame' -> lookup' currFrame' x
             | ReturnFrame _ -> failwith @@ "Lookup in ReturnFrame"
 
-
+      (* TODO: Fix Update *)
       let varBounded (currFrame : bindingTable list) (x : Ast.Id.t) : bool =
         match currFrame with
         | [] -> false
@@ -256,7 +257,7 @@ module IdMap = Map.Make(Ast.Id)
 
 
 
-      (* Need to check arguments and return types for all of the below per inference rules*)
+      (* TODO: Fix newVarDec *)
       let newVarDec (sigma : t) (x : Ast.Id.t) (v : Value.t) : t =
           let currFrame = ListStack.peek sigma in
               match currFrame with
@@ -272,6 +273,27 @@ module IdMap = Map.Make(Ast.Id)
                                             | [] -> failwith @@ "VarDec in EmptyFrame"
                                             | y :: ys -> IdMap.add x Value.V_None y
             | ReturnFrame _ -> failwith @@ "Variable Declaration in a Return Frame"
+
+      (* TODO: Add a new block scope to the top frame*)
+      let addBlock (sigma : t) : t =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame y :: ys ->
+            | ReturnFrame _ ->  failwith @@ "Unimplemented"
+
+      (* TODO: Drop a block scope from the top frame *)
+      let removeBlock
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame y :: ys -> ma
+            | ReturnFrame ->  failwith @@ "Unimplemented"
+
+      (* Bool on Weather top frame is returnFrame or FunctionFrame*)
+      let isFuncFrame (sigma : t) : bool =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame _ -> true
+            | ReturnFrame _ -> false
 
       let addFrame (sigma : t) : t =
         ListStack.push IdMap.empty sigma
@@ -303,7 +325,10 @@ module Fun = struct
         collectFun l FunMap.empty
 
     let findFunc (funMap : t) (x : Ast.Id.t) : Ast.Id.t list * S.t list=
-        FunMap.find x funMap
+        try
+            FunMap.find x funMap
+        with
+            | Not_found -> raise (UndefinedFunction x)
 
     let initFun (env : Env.t) (paramList : (Ast.Id.t * Value.t) list) : Env.t =
         let env' = Env.addFrame env in
@@ -317,13 +342,6 @@ module Fun = struct
 
 end
 
-(* TODO: (Potentially) Write cases to throw exception where the values are undefined or none.
- * TODO: (Potentially) Write cases to throw exception where the operator type doesnt make sense with the given Value types.
- * The reason I h that the user of the object language won't get much information
- * about what went wrong.ave written "potentially" above is because if we have all of the `good` cases
- * we may be able to ignore the `bad` cases by simply having one |_ -> failwith case. However, the
- * drawback in this case would be
- *)
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
   | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
