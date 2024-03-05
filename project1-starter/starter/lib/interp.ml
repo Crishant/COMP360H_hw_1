@@ -7,6 +7,7 @@
 
 module E = Ast.Expression
 module S = Ast.Stm
+module F = Fun
 
 (* 'a IdentMap.t:  the type of maps from identifiers to 'a.
  *)
@@ -173,17 +174,174 @@ module Api = struct
 
 end
 
+(* The code for Env/Frame Stuffs
+*)
+module IdMap = Map.Make(Ast.Id)
 
-module Env = struct 
-  type t = int
+    (* Stack Implementation using Lists.
+     * Source: http://wide.land/modules/ex_stacks.html
+     *
+     *)
+
+    module ListStack = struct
+      type 'a stack = 'a list
+
+      let empty = []
+      let is_empty s = s = []
+      let push x s = x :: s
+      let peek = function
+        | []   -> failwith @@ "Empty"
+        | x::_ -> x
+      let pop = function
+        | []    -> failwith @@ "Empty"
+        | _::xs -> xs
+    end
+
+
+    (* Environments.
+     *
+     * A value of type t is a map from identifiers to values.  We use σ to range
+     * over environments and standard function notation when describing them.
+     *)
+    module Env = struct
+
+      type bindingTable = Value.t IdMap.t
+
+      type frame =
+      | FunctionFrame of bindingTable list
+      | ReturnFrame of Value.t
+
+      type t = frame ListStack.stack
+
+      (* The type of environments.
+       *)
+
+      let rec lookup' (currFrame : bindingTable list) (x : Ast.Id.t) : Value.t =
+        match currFrame with
+          | [] -> raise (UnboundVariable x)
+          | y :: ys ->
+              try
+                  IdMap.find x y
+              with
+                  | Not_found -> lookup' ys x
+
+      let lookup (sigma : t) (x : Ast.Id.t) : Value.t =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame currFrame' -> lookup' currFrame' x
+            | ReturnFrame _ -> failwith @@ "Lookup in ReturnFrame"
+
+      (* TODO: Fix Update *)
+      let varBounded (currFrame : bindingTable list) (x : Ast.Id.t) : bool =
+        match currFrame with
+        | [] -> false
+        | y :: ys -> IdMap.mem x y
+
+      let rec update' (currFrame : bindingTable list) (x : Ast.Id.t) (v : Value.t) : t =
+        match currFrame with
+        | [] -> raise (UnboundVariable x)
+        | y :: ys -> match IdMap.mem x y with
+                        | true -> IdMap.add x v y
+                        | false -> update' ys x v
+
+      (*  update σ x v = σ{x → v}.
+       *)
+      let update (sigma : t) (x : Ast.Id.t) (v : Value.t) : t =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame currFrame'-> let varInFrame = varBounded currFrame' x in
+                                match varInFrame with
+                                | true -> update' currFrame' x t
+                                | false -> raise (UnboundVariable x)
+            | ReturnFrame _ -> failwith @@ "Update in a return Frame"
+
+
+
+      (* TODO: Fix newVarDec *)
+      let newVarDec (sigma : t) (x : Ast.Id.t) (v : Value.t) : t =
+          let currFrame = ListStack.peek sigma in
+              match currFrame with
+              | FunctionFrame currFrame' -> match currFrame' with
+                                              | [] -> failwith @@ "VarDec in EmptyFrame"
+                                              | y :: ys -> IdMap.add x v y
+              | ReturnFrame _ -> failwith @@ "Variable Declaration in a Return Frame"
+
+      let newVarDec (sigma : t) (x : Ast.Id.t) : t =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame currFrame' -> match currFrame' with
+                                            | [] -> failwith @@ "VarDec in EmptyFrame"
+                                            | y :: ys -> IdMap.add x Value.V_None y
+            | ReturnFrame _ -> failwith @@ "Variable Declaration in a Return Frame"
+
+      (* TODO: Add a new block scope to the top frame*)
+      let addBlock (sigma : t) : t =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame y :: ys ->
+            | ReturnFrame _ ->  failwith @@ "Unimplemented"
+
+      (* TODO: Drop a block scope from the top frame *)
+      let removeBlock
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame y :: ys -> ma
+            | ReturnFrame ->  failwith @@ "Unimplemented"
+
+      (* Bool on Weather top frame is returnFrame or FunctionFrame*)
+      let isFuncFrame (sigma : t) : bool =
+        let currFrame = ListStack.peek sigma in
+            match currFrame with
+            | FunctionFrame _ -> true
+            | ReturnFrame _ -> false
+
+      let addFrame (sigma : t) : t =
+        ListStack.push IdMap.empty sigma
+
+      let dropFrame (sigma : t) : t =
+        ListStack.pop sigma
+
+      (*  empty = σ, where dom σ = ∅.
+       *)
+      let empty : t = ListStack.empty
+
 end
-(* TODO: (Potentially) Write cases to throw exception where the values are undefined or none.
- * TODO: (Potentially) Write cases to throw exception where the operator type doesnt make sense with the given Value types.
- * The reason I have written "potentially" above is because if we have all of the `good` cases
- * we may be able to ignore the `bad` cases by simply having one |_ -> failwith case. However, the
- * drawback in this case would be that the user of the object language won't get much information
- * about what went wrong.
- *)
+
+(* Code for all the Functions stuff
+*)
+module FunMap = Map.Make(Ast.Id)
+
+module Fun = struct
+
+    type t = (Ast.Id.t list * S.t list) FunMap.t
+
+    let collectFun (l : Ast.Program.funDef list) (funMap : t) : t =
+        match l with
+        | [] -> funMap
+        | (Ast.Program.FunDef (name, params, body)) :: xs ->  FunMap.add name (params, body) funMap
+        | _ -> failwith "Error Collecting Functions"
+
+    let collectFun (l : Ast.Program.funDef list) : t =
+        collectFun l FunMap.empty
+
+    let findFunc (funMap : t) (x : Ast.Id.t) : Ast.Id.t list * S.t list=
+        try
+            FunMap.find x funMap
+        with
+            | Not_found -> raise (UndefinedFunction x)
+
+    let initFun (env : Env.t) (paramList : (Ast.Id.t * Value.t) list) : Env.t =
+        let env' = Env.addFrame env in
+            initFun' env' paramList
+
+    let initFun' (env : Env.t) (paramList : (Ast.Id.t * Value.t) list) : Env.t =
+        match paramlist with
+            | [] -> env
+            | (i, v) :: xs -> let env' = Env.newVarDec env i v in
+                                                initFun' env' xs
+
+end
+
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
   | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
