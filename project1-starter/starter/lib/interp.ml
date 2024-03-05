@@ -356,21 +356,21 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
        | Value.V_Int n -> (Value.V_Int (-n), sigma')
        | _ -> failwith "Type Error")
     | E.Call (func, l) ->
-      let (vl, sigma') = eval_all (l, sigma) in
-      let (xl, sl) = F.findFunc f func in
+      let (vl, sigma') = eval_all l sigma f in
+      let (xl, sl) = Fun.findFunc f func in
       let xvl = zip xl vl in
-      let sigma2 = F.initfunc xvl in
+      let sigma2 = Fun.initFun xvl in
       (match exec_stm sl sigma2 with
        | Env.ReturnFrame v -> (v, sigma')
        | _ -> failwith "Not a return frame")
 
 
-  and eval_all(el: E.t list) (sigma: Env.t) : Value.t list * Env.t = 
+  and eval_all(el: E.t list) (sigma: Env.t) (f: Fun.t) : Value.t list * Env.t = 
   match el with 
   | [] -> ([], sigma)
   | x :: xs -> 
-    let (v, sigma') = eval x sigma in
-    let (vs, sigma2) = eval_all xs sigma' in
+    let (v, sigma') = eval sigma x f  in
+    let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
 
   and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
