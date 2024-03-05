@@ -203,6 +203,17 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
+  let rec stm_list (ss :S.t list)(Env.t) = Env.t = 
+    match ss with
+    | [] => sigma
+    | x::xs => 
+      let sigma' = exec_stm S.t (xs) sigma in
+        match sigma' with 
+        | Env.FunctionFrame -> 
+            let sigma2 = exec_stm S.t (xs) sigma' in 
+              sigma2
+        | Env.ReturnFrame -> 
+            sigma'
   let rec eval (sigma : Env.t) (e : E.t) : Value.t * Env.t=
   (*! end !*)
     match e with
@@ -225,7 +236,7 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
     | E.Neg e -> 
       let (V_Int n, sigma') = eval sigma e in 
       (V_Int(-n), sigma')
-    | E.Call (x,l) -> failwith @@ "Unimplemented"
+    | E.Call (f,l) -> failwith @@ "Unimplemented"
     (* send a program as an argument *)
 
   and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
@@ -239,16 +250,33 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
         let sigma' = Env.vdec(y, sigma) in
           let (v, sigma2) = eval sigma' e in
           exec_stm S.t (xs) sigma2
-  | S.Expr e -> failwith @@ "Unimplemented"
-  | S.Block l -> failwith @@ "Unimplemented"
-  | S.If(e, s0, s1) -> failwith @@ "Unimplemented"
-  | S.While(e, s) -> failwith @@ "Unimplemented"
-  | S.Return(e) -> failwith @@ "Unimplemented" 
+  | S.Expr e ->
+    let (v, sigma') = eval sigma e in
+    sigma'
+  | S.Block l -> stm_list(l)
+  | S.If(e, s0, s1) -> 
+    let (v, sigma') = eval sigma e in
+    match v with
+    | Value.V_Bool true -> let (_,sigma2) = exec_stm S.t (s0) sigma' in sigma2
+    |_ -> let (_,sigma2) = exec_stm S.t (s1) sigma' in sigma2
+  | S.While(e, s) ->
+    let (v, sigma') = eval sigma e in
+    match v with
+    | Value.V_Bool false -> sigma'
+    |_ -> exec_stm S.t (s) sigma'
+  | S.Return(e) ->
+    match e  with
+    | e ->  e
+    |_ -> Value.V_None
     
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
   and exec (stm : Ast.Program.t) (sigma : Env.t) : Env.t =
     failwith @@ "Unimplemented"
+    (* match stm with 
+    | list ->  Fun.collectAll list 
+    Fun.find ("main")
+    execute main  *)
 
 
