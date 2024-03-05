@@ -203,7 +203,14 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
-  let rec eval (sigma : Env.t) (e : E.t) : Value.t * Env.t=
+let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list = 
+  match l1, l2 with 
+  | [],[] -> []
+  | x::xs, y::ys -> (x,y) :: zip(xs, ys)
+  | _ -> failwith @@ "No lists"
+
+
+  let rec eval (sigma : Env.t) (e : E.t) (f: F.t) : Value.t * Env.t=
   (*! end !*)
     match e with
     | E.Var x -> (Env.lookup(sigma, x), sigma)
@@ -219,7 +226,22 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
     | E.Neg e -> 
       let (V_Int n, sigma') = eval sigma e in 
       (V_Int(-n), sigma')
-    | E.Call (x,l) -> failwith @@ "Unimplemented"
+    | E.Call (func,l) -> 
+      let (vl, sigma') = eval_all(l, sigma) in 
+      let (xl, sl) = F.findFunc(f, func) in 
+      let xvl = zip xl vl in
+      let sigma2 = F.initfunc xvl in 
+      match exec_stm sl sigma2 with 
+      | Env.ReturnFrame v -> (v, sigma')
+      | _ -> failwith @@ "Not a return frame" 
+
+  and eval_all(el: E.t list, sigma: Env.t) : Value.t list * Env.t = 
+  match el with 
+  | [] -> ([], sigma)
+  | x :: xs -> 
+    let (v, sigma') = eval x sigma in
+    let (vs, sigma2) = eval_all xs sigma' in
+    (v::vs, sigma2)
 
   and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
   match stm with 
@@ -236,12 +258,12 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | S.Block l -> failwith @@ "Unimplemented"
   | S.If(e, s0, s1) -> failwith @@ "Unimplemented"
   | S.While(e, s) -> failwith @@ "Unimplemented"
-  | S.Return(e) -> failwith @@ "Unimplemented" 
+  | S.Return e -> failwith @@ "Unimplemented" 
     
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
-  and exec (stm : Ast.Program.t) (sigma : Env.t) : Env.t =
+  let exec (stm : Ast.Program.t) (sigma : Env.t) : Env.t =
     failwith @@ "Unimplemented"
 
 
