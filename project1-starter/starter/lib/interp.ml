@@ -419,11 +419,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
-  let exec (stm : Ast.Program.t) (sigma : Env.t) : Env.t =
-    failwith @@ "Unimplemented"
-    (* match stm with 
-    | list ->  Fun.collectAll list 
-    Fun.find ("main")
-    execute main  *)
-
+  let exec (stm : Ast.Program.t) : Value.t =
+    let f = Fun.collectFun (stm) in
+    let funName = Ast.Id.t "main" in
+    let (param_list, stm_list) = Fun.find f funName in
+    let env = Env.newFuncFrame in
+    let (v, sigma) = eval env (E.Call param_list stm_list) f in
+        v
 
