@@ -59,6 +59,7 @@ rule read_token =
     | "else"        { ELSE }
     | "while"       { WHILE }
     | "do"          { DO }
+    | "for"         { FOR }
     | "return"      { RETURN }
 
     | number        { NUM (int_of_string (Lexing.lexeme lexbuf)) }
