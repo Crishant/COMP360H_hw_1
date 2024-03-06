@@ -397,10 +397,18 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     | Value.V_Bool true -> let (_,sigma2) = exec_stm s0 sigma' f in sigma2
     |_ -> let (_,sigma2) = exec_stm s1 sigma' f in sigma2
   | S.While(e, s) -> loop e s sigma f
-  | S.Return(e) ->
-    match e with
-    | e ->  e
-    |_ -> Value.V_None
+  | S.Return(e) -> let (v, _) = eval sigma e f in
+     Env.newReturnFrame v
+  | S.Return -> Env.newReturnFrame Value.V_None
+  | S.For (dec, e1,e2, sl) -> match dec with
+    | S.VarDec l -> let val sigma' = exec_stm l sigma f in
+        loop2 e1 e2 sl sigma' f
+    | S.Expr exp -> match exp with
+        | E.Assign -> let val (_, sigma') = eval sigma exp f in
+                        loop2 e1 e2 sl sigma' f
+        | _ -> failwith @@ "fuck this shit"
+    |_ -> failwith @@ "fuck fuck"
+
 
   and loop (e : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
     let (v, sigma') = eval sigma e f in
@@ -411,7 +419,18 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
         match sigma2 with
         | ReturnFrame _ -> sigma2
         | FunctionFrame _ -> loop e s sigma2 f
-    
+    | _ -> sigma'
+
+  and loop2 (e : E.t) (incr : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
+    let (v, sigma') = eval sigma e f in
+    match v with
+    | Value.V_Bool true -> let sigma2 = exec_stm s sigma' f in
+        match sigma2 with
+        | ReturnFrame _ -> sigma2
+        | FunctionFrame _ -> let (sigma3) = eval sigma2 incr f in
+                loop2 e incr s sigma2 f
+    | _ -> sigma'
+  
   and stm_list (ss : S.t list)(sigma: Env.t)(f : Fun.t) : Env.t =
     match ss with
     | [] -> sigma
