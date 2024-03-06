@@ -373,17 +373,20 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
 
-  and exec_stm(stm: S.t)(sigma: Env.t): Env.t = 
+  and exec_stm(stm: S.t)(sigma: Env.t) (f: Fun.t): Env.t = 
   match stm with 
   | S.Skip -> sigma
   | S.VarDec l -> 
     match l with 
-    |x :: xs -> match x with 
-      |y -> exec_stm S.t (xs) Env.vdec(y, sigma) 
-      | (y, e) -> 
-        let sigma' = Env.vdec(y, sigma) in
-          let (v, sigma2) = eval sigma' e in
-          exec_stm S.t (xs) sigma2
+    | x :: xs -> 
+      match x with
+      | var -> 
+        let sigma' = Env.newVarDec sigma var V_Undefined in
+        exec_stm xs sigma' f
+      | (var, e) -> 
+        let (v, sigma') = eval sigma e f in
+        let sigma2 = Env.newVarDec sigma' var v in
+        exec_stm xs sigma2 f
   | S.Expr e ->
     let (v, sigma') = eval sigma e in
     sigma'
