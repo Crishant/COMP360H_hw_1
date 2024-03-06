@@ -394,8 +394,8 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
   | S.If(e, s0, s1) -> 
     let (v, sigma') = eval sigma e f in
     match v with
-    | Value.V_Bool true -> let (_,sigma2) = exec_stm s0 sigma' f in sigma2
-    |_ -> let (_,sigma2) = exec_stm s1 sigma' f in sigma2
+    | Value.V_Bool true -> exec_stm s0 sigma' f
+    |_ -> exec_stm s1 sigma' f
   | S.While(e, s) ->
     let (v, sigma') = eval sigma e f in
     match v with
@@ -410,12 +410,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     match ss with
     | [] -> sigma
     | x::xs -> 
-      let sigma' = exec_stm xs sigma f in
+      let sigma' = exec_stm x sigma f in
         match sigma' with 
-        | Env.FunctionFrame -> 
-            let sigma2 = exec_stm xs sigma' f in
-              sigma2
-        | Env.ReturnFrame -> 
+        | Env.FunctionFrame _ -> 
+            exec_stm xs sigma' f
+        | Env.ReturnFrame _ -> 
             sigma'
 
     
