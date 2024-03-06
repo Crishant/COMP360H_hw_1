@@ -48,6 +48,7 @@
 %token WHILE
 %token DO
 %token RETURN
+%token FOR
 
 %token EOF
 
@@ -179,6 +180,8 @@ compound_stm:
         { If(e, s0, Skip) }
     | WHILE ; e = exp ; DO ; s = stm
         { While(e, s) }
+    | FOR ; LPAREN ; init = prim_stm ; SEMI ; t = exp ; SEMI ; incr = exp RPAREN ; body = stm
+        { For(init, t, incr, body) }
 
 body_stm:
     | s = prim_stm_term
@@ -210,4 +213,3 @@ terminated_stm:
 
 terminated_pgm:
     | p = pgm ; EOF                 { p }
-
