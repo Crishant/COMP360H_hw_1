@@ -373,7 +373,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
 
-  and exec_stm(stm: S.t)(sigma: Env.t) (f: Fun.t): Env.t = 
+  and exec_stm(stm: S.t)(sigma: Env.t)(f : Fun.t): Env.t =
   match stm with 
   | S.Skip -> sigma
   | S.VarDec l -> 
@@ -388,32 +388,32 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
         let sigma2 = Env.newVarDec sigma' var v in
         exec_stm xs sigma2 f
   | S.Expr e ->
-    let (v, sigma') = eval sigma e in
+    let (v, sigma') = eval sigma e f in
     sigma'
-  | S.Block l -> stm_list(l)
+  | S.Block l -> stm_list l sigma f
   | S.If(e, s0, s1) -> 
-    let (v, sigma') = eval sigma e in
+    let (v, sigma') = eval sigma e f in
     match v with
-    | Value.V_Bool true -> let (_,sigma2) = exec_stm S.t (s0) sigma' in sigma2
-    |_ -> let (_,sigma2) = exec_stm S.t (s1) sigma' in sigma2
+    | Value.V_Bool true -> let (_,sigma2) = exec_stm s0 sigma' f in sigma2
+    |_ -> let (_,sigma2) = exec_stm s1 sigma' f in sigma2
   | S.While(e, s) ->
-    let (v, sigma') = eval sigma e in
+    let (v, sigma') = eval sigma e f in
     match v with
     | Value.V_Bool false -> sigma'
-    |_ -> exec_stm S.t (s) sigma'
+    |_ -> exec_stm s sigma' f
   | S.Return(e) ->
     match e  with
     | e ->  e
     |_ -> Value.V_None
   
-  and stm_list (ss : S.t list)(sigma: Env.t) : Env.t = 
+  and stm_list (ss : S.t list)(sigma: Env.t)(f : Fun.t) : Env.t =
     match ss with
     | [] -> sigma
     | x::xs -> 
-      let sigma' = exec_stm S.t (xs) sigma in
+      let sigma' = exec_stm xs sigma f in
         match sigma' with 
         | Env.FunctionFrame -> 
-            let sigma2 = exec_stm S.t (xs) sigma' in 
+            let sigma2 = exec_stm xs sigma' f in
               sigma2
         | Env.ReturnFrame -> 
             sigma'
@@ -423,10 +423,10 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
  * provided as a handout.
  *)
   let exec (stm : Ast.Program.t) : Value.t =
-    let f = Fun.collectFun (stm) in
+    let f = Fun.collectFun stm in
     let funName = Ast.Id.t "main" in
-    let (param_list, stm_list) = Fun.find f funName in
+    let (param_list, stmt_list) = Fun.findFunc f funName in
     let env = Env.newFuncFrame in
-    let (v, sigma) = eval env (E.Call param_list stm_list) f in
+    let (v, sigma) = eval env (E.Call param_list stmt_list) f in
         v
 
