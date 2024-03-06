@@ -44,6 +44,7 @@ module Stm = struct
         | Block of t list
         | If of Expression.t*t*t
         | While of Expression.t*t
+        | For of t*Expression.t*Expression.t*t
         | Return of Expression.t option
         [@@deriving show]
 end
