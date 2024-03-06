@@ -401,10 +401,10 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
      Env.newReturnFrame v
   | S.Return -> Env.newReturnFrame Value.V_None
   | S.For (dec, e1,e2, sl) -> match dec with
-    | S.VarDec l -> let val sigma' = exec_stm l sigma f in
+    | S.VarDec l -> let sigma' = exec_stm l sigma f in
         loop2 e1 e2 sl sigma' f
     | S.Expr exp -> match exp with
-        | E.Assign -> let val (_, sigma') = eval sigma exp f in
+        | E.Assign -> let (_, sigma') = eval sigma exp f in
                         loop2 e1 e2 sl sigma' f
         | _ -> failwith @@ "fuck this shit"
     |_ -> failwith @@ "fuck fuck"
