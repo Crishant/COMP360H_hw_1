@@ -249,7 +249,7 @@ module IdMap = Map.Make(Ast.Id)
 
       let removeBlock (currFrame : t) : t =
             match currFrame with
-            | ReturnFrame _ ->  failwith @@ "Unimplemented"
+            | ReturnFrame _ ->  failwith @@ "Cannot Remove ReturnFrame"
             | FunctionFrame currFrame' -> match currFrame' with
                             | [] -> failwith @@ "No Block to Remove"
                             | y :: ys -> FunctionFrame (ys)
@@ -397,6 +397,15 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     | Value.V_Bool true -> let (_,sigma2) = exec_stm s0 sigma' f in sigma2
     |_ -> let (_,sigma2) = exec_stm s1 sigma' f in sigma2
   | S.While(e, s) -> loop e s sigma f
+  | S.For (i,b,c,s) -> 
+    match i with
+    | (*declared*)
+    |_ (*not declared*)
+    let (sigma') = exec_stm S.t (xs) Env.vdec(i, sigma) in
+    let (v,sigma2) = eval sigma' b in
+    match v with
+    | Value.V_Bool -> sigma2
+    |_ -> sigma2
   | S.Return(e) ->
     match e with
     | e ->  e
