@@ -424,12 +424,13 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
   and loop2 (e : E.t) (incr : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
     let (v, sigma') = eval sigma e f in
     match v with
+    | Value.V_Bool false -> sigma'
+    | _ -> failwith @@ "Not a bool"
     | Value.V_Bool true -> let sigma2 = exec_stm s sigma' f in
         match sigma2 with
         | ReturnFrame _ -> sigma2
-        | FunctionFrame _ -> let (sigma3) = eval sigma2 incr f in
-                loop2 e incr s sigma2 f
-    | _ -> sigma'
+        | FunctionFrame _ -> let (_,sigma3) = eval sigma2 incr f in
+                loop2 e incr s sigma3 f
   
   and stm_list (ss : S.t list)(sigma: Env.t)(f : Fun.t) : Env.t =
     match ss with
