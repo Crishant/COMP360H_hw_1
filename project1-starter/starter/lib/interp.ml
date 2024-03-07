@@ -456,9 +456,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     match stm with
       | Ast.Program.Pgm(stm') ->
         let f = Fun.collectFun stm' in
-        let funName = Ast.Id.t "main" in
-        let (param_list, stmt_list) = Fun.findFunc f funName in
-        let env = Env.newFuncFrame in
-        let _ = exec_stm env stmt_list f in
-            ()
+        let funName = "main" in
+        match Fun.findFunc f funName with
+        | None -> ()
+        | Some (_, stmt_list) ->
+            let env = Env.newFuncFrame in
+            let _ = exec_stm (S.Block stmt_list) env f in
+                ()
 
