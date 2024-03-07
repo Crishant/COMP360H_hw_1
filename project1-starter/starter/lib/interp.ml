@@ -360,7 +360,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       let (xl, sl) = Fun.findFunc f func in
       let xvl = zip xl vl in
       let sigma2 = Fun.initFun xvl in
-      (match exec_stm sl sigma2 f with
+      (match exec_stm (S.Block sl) sigma2 f with
        | ReturnFrame v -> (v, sigma')
        | _ -> failwith "Not a return frame")
 
@@ -382,7 +382,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
          | (var, e) :: xs ->
            let (v, sigma') = eval sigma e f in
            let sigma2 = Env.newVarDec sigma' var v in
-           exec_stm xs sigma2 f)
+           exec_stm (S.VarDec xs) sigma2 f)
       | S.Expr e ->
         let (_, sigma') = eval sigma e f in
         sigma'
