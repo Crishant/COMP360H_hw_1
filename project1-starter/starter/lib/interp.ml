@@ -360,8 +360,8 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       let (xl, sl) = Fun.findFunc f func in
       let xvl = zip xl vl in
       let sigma2 = Fun.initFun xvl in
-      (match exec_stm sl sigma2 with
-       | Env.ReturnFrame v -> (v, sigma')
+      (match exec_stm sl sigma2 f with
+       | ReturnFrame v -> (v, sigma')
        | _ -> failwith "Not a return frame")
 
 
@@ -449,10 +449,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
  * provided as a handout.
  *)
   let exec (stm : Ast.Program.t) : Value.t =
-    let f = Fun.collectFun stm in
+    failwith @@ "Unimplemented"
+    (* let f = Fun.collectFun stm in
     let funName = Ast.Id.t "main" in
     let (param_list, stmt_list) = Fun.findFunc f funName in
     let env = Env.newFuncFrame in
-    let (v, sigma) = eval env (E.Call param_list stmt_list) f in
-        v
+    let (v, sigma) = eval env (E.Call funName stmt_list) f in
+        v *)
 
