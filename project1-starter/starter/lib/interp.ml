@@ -284,11 +284,11 @@ module Fun = struct
     let collectFun (l : Ast.Program.fundef list) : t =
         collectFun l FunMap.empty
 
-    let findFunc (funMap : t) (x : Ast.Id.t) : Ast.Id.t list * S.t list=
+    let findFunc (funMap : t) (x : Ast.Id.t) : (Ast.Id.t list * S.t list) option =
         try
-            FunMap.find x funMap
+            Some (FunMap.find x funMap)
         with
-            | Not_found -> raise (UndefinedFunction x)
+            | Not_found -> None
 
     let rec initFun' (env : Env.t) (paramList : (Ast.Id.t * Value.t) list) : Env.t =
         match paramList with
@@ -357,7 +357,10 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
        | _ -> failwith "Type Error")
     | E.Call (func, l) ->
       let (vl, sigma') = eval_all l sigma f in
-      let (xl, sl) = Fun.findFunc f func in
+      match Fun.findFunc f func with
+      | None -> let v = Api.do_call func vl in
+                (v, sigma')
+      | Some (xl, sl) ->
       let xvl = zip xl vl in
       let sigma2 = Fun.initFun xvl in
       (match exec_stm (S.Block sl) sigma2 f with
@@ -449,7 +452,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
-  let exec (stm : Ast.Program.t) : Value.t =
+  let exec (stm : Ast.Program.t) : unit =
     match stm with
     | _ ->     failwith @@ "Unimplemented"
     (* match stm with
