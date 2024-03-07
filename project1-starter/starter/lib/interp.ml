@@ -454,13 +454,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
  *)
   let exec (stm : Ast.Program.t) : unit =
     match stm with
-    | _ ->     failwith @@ "Unimplemented"
-    (* match stm with
-      | Ast.Program.fundef list stm' ->
+      | Ast.Program.Pgm(stm') ->
         let f = Fun.collectFun stm' in
         let funName = Ast.Id.t "main" in
         let (param_list, stmt_list) = Fun.findFunc f funName in
         let env = Env.newFuncFrame in
-        let (v, sigma) = eval env (E.Call funName stmt_list) f in
-            v *)
+        let _ = exec_stm env stmt_list f in
+            ()
 
