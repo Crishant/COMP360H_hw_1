@@ -252,7 +252,7 @@ module IdMap = Map.Make(Ast.Id)
             | ReturnFrame _ ->  failwith @@ "Unimplemented"
             | FunctionFrame currFrame' -> match currFrame' with
                             | [] -> failwith @@ "No Block to Remove"
-                            | y :: ys -> FunctionFrame (ys)
+                            | _ :: ys -> FunctionFrame (ys)
       let isFuncFrame (currFrame : t) : bool =
             match currFrame with
             | FunctionFrame _ -> true
@@ -279,16 +279,16 @@ module Fun = struct
     let collectFun (l : Ast.Program.fundef list) (funMap : t) : t =
         match l with
         | [] -> funMap
-        | (Ast.Program.FunDef (name, params, body)) :: xs ->  FunMap.add name (params, body) funMap
+        | (Ast.Program.FunDef (name, params, body)) :: _ ->  FunMap.add name (params, body) funMap
 
     let collectFun (l : Ast.Program.fundef list) : t =
         collectFun l FunMap.empty
 
-    let findFunc (funMap : t) (x : Ast.Id.t) : Ast.Id.t list * S.t list=
+    let findFunc (funMap : t) (x : Ast.Id.t) : (Ast.Id.t list * S.t list) option =
         try
-            FunMap.find x funMap
+            Some (FunMap.find x funMap)
         with
-            | Not_found -> raise (UndefinedFunction x)
+            | Not_found -> None
 
     let rec initFun' (env : Env.t) (paramList : (Ast.Id.t * Value.t) list) : Env.t =
         match paramList with
@@ -357,11 +357,14 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
        | _ -> failwith "Type Error")
     | E.Call (func, l) ->
       let (vl, sigma') = eval_all l sigma f in
-      let (xl, sl) = Fun.findFunc f func in
+      match Fun.findFunc f func with
+      | None -> let v = Api.do_call func vl in
+                (v, sigma')
+      | Some (xl, sl) ->
       let xvl = zip xl vl in
       let sigma2 = Fun.initFun xvl in
-      (match exec_stm sl sigma2 with
-       | Env.ReturnFrame v -> (v, sigma')
+      (match exec_stm (S.Block sl) sigma2 f with
+       | ReturnFrame v -> (v, sigma')
        | _ -> failwith "Not a return frame")
 
 
@@ -373,86 +376,91 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
 
-  and exec_stm(stm: S.t)(sigma: Env.t)(f : Fun.t): Env.t =
-  match stm with 
-  | S.Skip -> sigma
-  | S.VarDec l -> 
-    match l with 
-    | x :: xs -> 
-      match x with
-      | var -> 
-        let sigma' = Env.newVarDec sigma var V_Undefined in
-        exec_stm xs sigma' f
-      | (var, e) -> 
+    and exec_stm (stm : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
+      match stm with
+      | S.Skip -> sigma
+      | S.VarDec l ->
+        (match l with
+         | [] -> sigma
+         | (var, e) :: xs ->
+          match e with
+          | Some e' -> 
+            let (v, sigma') = eval sigma e' f in
+            let sigma2 = Env.newVarDec sigma' var v in
+            exec_stm (S.VarDec xs) sigma2 f
+          | None -> let sigma' = Env.newVarDec sigma var Value.V_Undefined in
+            exec_stm (S.VarDec xs) sigma' f)
+      | S.Expr e ->
+        let (_, sigma') = eval sigma e f in
+        sigma'
+      | S.Block l -> stm_list l sigma f
+      | S.If (e, s0, s1) ->
         let (v, sigma') = eval sigma e f in
-        let sigma2 = Env.newVarDec sigma' var v in
-        exec_stm xs sigma2 f
-  | S.Expr e ->
-    let (v, sigma') = eval sigma e f in
-    sigma'
-  | S.Block l -> stm_list l sigma f
-  | S.If(e, s0, s1) -> 
-    let (v, sigma') = eval sigma e f in
-    match v with
-    | Value.V_Bool true -> let (_,sigma2) = exec_stm s0 sigma' f in sigma2
-    |_ -> let (_,sigma2) = exec_stm s1 sigma' f in sigma2
-  | S.While(e, s) -> loop e s sigma f
-  | S.Return(e) -> let (v, _) = eval sigma e f in
-     Env.newReturnFrame v
-  | S.Return -> Env.newReturnFrame Value.V_None
-  | S.For (dec, e1,e2, sl) -> match dec with
-    | S.VarDec l -> let sigma' = exec_stm l sigma f in
-        loop2 e1 e2 sl sigma' f
-    | S.Expr exp -> match exp with
-        | E.Assign -> let (_, sigma') = eval sigma exp f in
-                        loop2 e1 e2 sl sigma' f
-        | _ -> failwith @@ "fuck this shit"
-    |_ -> failwith @@ "fuck fuck"
-
-
-  and loop (e : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
-    let (v, sigma') = eval sigma e f in
-    match v with
-    | Value.V_Bool false -> sigma'
-    | _ -> failwith @@ "Not a bool"
-    | Value.V_Bool true -> let sigma2 = exec_stm s sigma' f in
-        match sigma2 with
-        | ReturnFrame _ -> sigma2
-        | FunctionFrame _ -> loop e s sigma2 f
-    | _ -> sigma'
-
-  and loop2 (e : E.t) (incr : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
-    let (v, sigma') = eval sigma e f in
-    match v with
-    | Value.V_Bool false -> sigma'
-    | _ -> failwith @@ "Not a bool"
-    | Value.V_Bool true -> let sigma2 = exec_stm s sigma' f in
-        match sigma2 with
-        | ReturnFrame _ -> sigma2
-        | FunctionFrame _ -> let (_,sigma3) = eval sigma2 incr f in
-                loop2 e incr s sigma3 f
-  
-  and stm_list (ss : S.t list)(sigma: Env.t)(f : Fun.t) : Env.t =
-    match ss with
-    | [] -> sigma
-    | x::xs -> 
-      let sigma' = exec_stm x sigma f in
-        match sigma' with 
-        | Env.FunctionFrame _ -> 
-            let sigma2 = exec_stm xs sigma' f in
-              sigma2
-        | Env.ReturnFrame _ -> 
-            sigma'
+        (match v with
+         | Value.V_Bool true -> exec_stm s0 sigma' f
+         | Value.V_Bool false -> exec_stm s1 sigma' f
+         | _ -> failwith "Non-boolean value in if condition")
+      | S.While (e, s) -> loop e s sigma f
+      | S.Return Some e ->
+        let (v, _) = eval sigma e f in
+        Env.newReturnFrame v
+      | S.Return None -> Env.newReturnFrame Value.V_None
+      | S.For (dec, e1, e2, sl) ->
+        (match dec with
+         | S.VarDec l -> exec_stm (S.VarDec l) sigma f |> loop2 e1 e2 sl f
+         | S.Expr exp ->
+           (match exp with
+            | E.Assign (_, _) -> let (_, sigma') = eval sigma exp f in loop2 e1 e2 sl f sigma'
+            | _ -> failwith "Invalid expression in for loop")
+         | _ -> failwith "Invalid for loop declaration")
+    
+    and loop (e : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
+      let (v, sigma') = eval sigma e f in
+      match v with
+      | Value.V_Bool false -> sigma'
+      | Value.V_Bool true ->
+        let sigma2 = exec_stm s sigma' f in
+        (match sigma2 with
+         | Env.ReturnFrame _ -> sigma2
+         | Env.FunctionFrame _ -> loop e s sigma2 f)
+      | _ -> failwith "Non-boolean value in while condition"
+    
+    and loop2 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
+      let (v, sigma') = eval sigma e f in
+      match v with
+      | Value.V_Bool false -> sigma'
+      | Value.V_Bool true ->
+        let sigma2 = exec_stm s sigma' f in
+        (match sigma2 with
+         | Env.ReturnFrame _ -> sigma2
+         | Env.FunctionFrame _ ->
+           let (_, sigma3) = eval sigma2 incr f in
+           loop2 e incr s f sigma3)
+      | _ -> failwith "Non-boolean value in for loop condition"
+    
+    and stm_list (ss : S.t list) (sigma : Env.t) (f : Fun.t) : Env.t =
+      match ss with
+      | [] -> sigma
+      | s :: rest ->
+        let sigma' = exec_stm s sigma f in
+        (match sigma' with
+         | Env.FunctionFrame _ -> stm_list rest sigma' f
+         | Env.ReturnFrame _ -> sigma')
+    
 
     
 (* exec p :  execute the program p according to the operational semantics
  * provided as a handout.
  *)
-  let exec (stm : Ast.Program.t) : Value.t =
-    let f = Fun.collectFun stm in
-    let funName = Ast.Id.t "main" in
-    let (param_list, stmt_list) = Fun.findFunc f funName in
-    let env = Env.newFuncFrame in
-    let (v, sigma) = eval env (E.Call param_list stmt_list) f in
-        v
+  let exec (stm : Ast.Program.t) : unit =
+    match stm with
+      | Ast.Program.Pgm(stm') ->
+        let f = Fun.collectFun stm' in
+        let funName = "main" in
+        match Fun.findFunc f funName with
+        | None -> ()
+        | Some (_, stmt_list) ->
+            let env = Env.newFuncFrame in
+            let _ = exec_stm (S.Block stmt_list) env f in
+                ()
 
