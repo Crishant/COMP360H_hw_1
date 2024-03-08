@@ -303,6 +303,7 @@ module Fun = struct
 
 end
 
+(* FUNCTION binop: Matches values to the correct BINOP expression. Takes in BINOP operand and two values to compute operand on and returns its value t. *)
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
   | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
@@ -322,34 +323,41 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
   | _ -> failwith @@ "Something went Wrong!"
 
+
 let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list = 
   match l1, l2 with 
   | [],[] -> []
   | x::xs, y::ys -> (x, y) :: zip xs ys
   | _ -> failwith @@ "No lists"
-
-
   
-
+  (* FUNCTION eval (recursive): Evaluates Expressions. Takes in environment sigma, expression e and function t (for Call) and returns the expression's value and updated environment. *)
   let rec eval (sigma : Env.t) (e : E.t) (f: Fun.t) : Value.t * Env.t =
     match e with
+    (* Variable Lookup. *)
     | E.Var x -> (Env.lookup sigma x, sigma)
+    (* Integer expression. *)
     | E.Num n -> (Value.V_Int n, sigma)
+    (* Boolean expression. *)
     | E.Bool b -> (Value.V_Bool b, sigma)
+    (* String expression. *)
     | E.Str s -> (Value.V_Str s, sigma)
+    (* Calls BINOP expression. Makes recursive call to evaluate each internal expression. *)
     | E.Binop (op, e1, e2) ->
       let (v1, sigma1) = eval sigma e1 f in
       let (v2, sigma2) = eval sigma1 e2 f in
       (binop op v1 v2, sigma2)
+    (* Assign value in expression e to x. *)
     | E.Assign (x, e) ->
       let (v, sigma') = eval sigma e f in
       let sigma2 = Env.update sigma' x v in
       (v, sigma2)
+    (* Not operator (switches Boolean expressions).  *)
     | E.Not e ->
       let (v, sigma') = eval sigma e f in
       (match v with
        | Value.V_Bool b -> (Value.V_Bool (not b), sigma')
        | _ -> failwith "Type Error")
+    (* Negative of expression e. First evaluates e and then returns its negative. *)
     | E.Neg e ->
       let (v, sigma') = eval sigma e f in
       (match v with
@@ -367,7 +375,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
        | ReturnFrame v -> (v, sigma')
        | _ -> failwith "Not a return frame")
 
-
+  
   and eval_all(el: E.t list) (sigma: Env.t) (f: Fun.t) : Value.t list * Env.t = 
   match el with 
   | [] -> ([], sigma)
@@ -376,9 +384,12 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
     let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
 
+    (* FUNCTION exec_stm (recursive): Executes statements. Takes in statement stm, environment sigma, and function t and returns the updated environment. *)
     and exec_stm (stm : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
       match stm with
+      (* Skip statement. Case where there is no "else" within an if statement. *)
       | S.Skip -> sigma
+      (* Variable declaration. Accounts for multiple declarations within a line (therefore taking a list). Evaluates expression and assigns values to its variables (recursively within list). *)
       | S.VarDec l ->
         (match l with
          | [] -> sigma
@@ -390,6 +401,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
             exec_stm (S.VarDec xs) sigma2 f
           | None -> let sigma' = Env.newVarDec sigma var Value.V_Undefined in
             exec_stm (S.VarDec xs) sigma' f)
+      (* Evaluates expression within statement. *)      
       | S.Expr e ->
         let (_, sigma') = eval sigma e f in
         sigma'
@@ -398,6 +410,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
                             match sigma2 with
                             | Env.FunctionFrame _ -> Env.removeBlock sigma2
                             | Env.ReturnFrame _ -> sigma2)
+      (* Executes if statements. Evaluates boolean expression e (accounting for type errors), and recursively executes statement based on its result. *)
       | S.If (e, s0, s1) ->
         let (v, sigma') = eval sigma e f in
         (match v with
@@ -405,9 +418,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
          | Value.V_Bool false -> exec_stm s1 sigma' f
          | _ -> failwith "Non-boolean value in if condition")
       | S.While (e, s) -> loop e s sigma f
+      (* Return case with value from expression e. Calls helper function to create a return frame with value v. *)
       | S.Return Some e ->
         let (v, _) = eval sigma e f in
         Env.newReturnFrame v
+      (* Return case with no value. Creates new return frame with None. *)
       | S.Return None -> Env.newReturnFrame Value.V_None
       | S.For (dec, e1, e2, sl) ->
         (match dec with
