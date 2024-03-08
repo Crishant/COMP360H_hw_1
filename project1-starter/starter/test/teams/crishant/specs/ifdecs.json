@@ -5,6 +5,6 @@
 }
 {
     "file" : "if-decs.imp",
-    "input" : ["8,4, 12"],
-    "output" : ["false", "69"]
+    "input" : ["8", "4", "12"],
+    "output" : ["false", "69", "yes"]
 }
