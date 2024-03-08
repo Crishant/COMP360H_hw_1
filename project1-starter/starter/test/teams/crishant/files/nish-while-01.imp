@@ -4,8 +4,8 @@ function main() {
   var a ;
   var b ;
 
-  a = prompt_int("Enter a: ") ;
-  b = prompt_int("Enter b: ") ;
+  a = prompt_int("Enter a: ");
+  b = prompt_int("Enter b: ");
 
   while a < b do {
     a = a + 1;

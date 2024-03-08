@@ -1,8 +1,8 @@
 function main() {
     var x = 3;
 
-    if (x < 4) then{
-        while (x != 1) do{
+    if x < 4 then{
+        while x != 1 do{
             x = x - 1;
         }
     }

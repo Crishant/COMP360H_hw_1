@@ -19,7 +19,7 @@ function helper () {
     return sub_helper(5);
 }
 
-function sub_helper a) {
+function sub_helper () {
 
     var a;
     a = 78;

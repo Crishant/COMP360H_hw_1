@@ -2,7 +2,7 @@ function main() {
     var a;
     var b;
 
-    a = prompt_int("Enter a: ") ;
+    a = prompt_int("Enter a: ");
     b = 1;
 
     while a != 1 do {

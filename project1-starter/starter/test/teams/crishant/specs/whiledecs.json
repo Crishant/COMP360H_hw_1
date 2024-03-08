@@ -1,5 +1,5 @@
 {
     "file" : "chriswhiledecs.imp",
     "input" : [],
-    "output" : ["4", "this should only print once"]
+    "output" : ["this should only print once.","4"]
 }

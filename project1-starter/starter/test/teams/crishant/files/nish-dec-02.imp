@@ -1,5 +1,5 @@
 function main() {
-  var x, y = 2;
+  var x = 2, y = 2;
 
   print_int(x) ;
   print_int(y) ;

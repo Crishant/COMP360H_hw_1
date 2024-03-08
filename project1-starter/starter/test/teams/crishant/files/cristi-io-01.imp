@@ -6,7 +6,7 @@ function main() {
   a = prompt_int("Enter a number: ") ;
   b = prompt_int("Enter another number: ") ;
 
-  if b > 0 && a > 0 then {
+  if (b > 0) && (a > 0) then {
     y = a % b ;
   } else {
     y = a * b;

@@ -22,13 +22,11 @@
   "output" : ["2", "3", "4", "5", "6"]
 }
 
-
 {
   "file" : "nish-while-02.imp",
   "input" : ["1","6"],
   "output" : ["8"]
 }
-
 
 {
   "file" : "nish-while-02.imp",

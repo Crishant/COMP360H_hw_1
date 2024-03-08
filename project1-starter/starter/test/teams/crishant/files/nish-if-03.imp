@@ -9,15 +9,12 @@ function main() {
   c = prompt_int("Enter c: ") ;
 
   if b == a then {
-    if (c >= b) {
+    if c >= b then {
         print_bool(true);
-    }
-    else {
+    } else {
         print_bool(false);
     }
-  }
-
-  else {
+  } else {
       if a < b then {
         print_int(a) ;
       }

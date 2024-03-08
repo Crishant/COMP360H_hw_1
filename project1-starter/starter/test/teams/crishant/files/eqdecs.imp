@@ -9,7 +9,7 @@ function main() {
 
     if a < b then {
         print_int(b);
-    } else then {
+    } else {
         print_int(a);
     }
 
@@ -17,9 +17,9 @@ function main() {
         print_str("equal");
     }
 
-    d = a < b;
-    e = a > c;
-    f = a == b;
+    var d = a < b;
+    var e = a > c;
+    var f = a == b;
 
     print_bool(d);
     print_bool(e);

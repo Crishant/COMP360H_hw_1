@@ -9,8 +9,9 @@ function main() {
         print_str("This should not run.");
     }
 
-    while b == 4 {
+    while b == 4 do {
         print_str("this should only print once.");
+        b = b - 1;
     }
 
     print_int(a);

@@ -5,7 +5,7 @@ function main() {
   var c ;
 
   a = helper() ;
-  b = helper_2()  ;
+  b = helper_2() ;
   c = helper_3(a,b) ;
 
   print_int(a);
