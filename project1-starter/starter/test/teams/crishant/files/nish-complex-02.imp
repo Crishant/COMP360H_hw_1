@@ -28,5 +28,5 @@ function main() {
     print_int(b);
     print_int(c);
   }
-
+  return;
 }

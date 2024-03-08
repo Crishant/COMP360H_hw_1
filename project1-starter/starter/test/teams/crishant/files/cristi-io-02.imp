@@ -4,7 +4,7 @@ function main() {
   var c = 0;
 
   a = prompt_int("Enter a: ");
-  b = prompt_str("Enter b: ");
+  b = prompt_int("Enter b: ");
 
   if a < 0 then {
     print_str("a not postive int");
