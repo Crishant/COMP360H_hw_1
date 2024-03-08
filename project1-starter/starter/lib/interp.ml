@@ -276,10 +276,10 @@ module Fun = struct
 
     type t = (Ast.Id.t list * S.t list) FunMap.t
 
-    let collectFun (l : Ast.Program.fundef list) (funMap : t) : t =
+    let rec collectFun (l : Ast.Program.fundef list) (funMap : t) : t =
         match l with
         | [] -> funMap
-        | (Ast.Program.FunDef (name, params, body)) :: _ ->  FunMap.add name (params, body) funMap
+        | (Ast.Program.FunDef (name, params, body)) :: xs ->  collectFun xs (FunMap.add name (params, body) funMap)
 
     let collectFun (l : Ast.Program.fundef list) : t =
         collectFun l FunMap.empty
