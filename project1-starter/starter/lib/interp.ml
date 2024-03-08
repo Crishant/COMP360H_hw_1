@@ -242,14 +242,14 @@ module IdMap = Map.Make(Ast.Id)
 
       let addBlock (currFrame : t) : t =
             match currFrame with
-            | ReturnFrame _ ->  failwith @@ "Unimplemented"
+            | ReturnFrame _ ->  failwith @@ "Unimplemented 1"
             | FunctionFrame currFrame' -> match currFrame' with
                             | [] -> FunctionFrame (IdMap.empty :: [])
                             | y :: ys -> FunctionFrame (IdMap.empty :: y :: ys)
 
       let removeBlock (currFrame : t) : t =
             match currFrame with
-            | ReturnFrame _ ->  failwith @@ "Unimplemented"
+            | ReturnFrame _ ->  failwith @@ "Unimplemented 2"
             | FunctionFrame currFrame' -> match currFrame' with
                             | [] -> failwith @@ "No Block to Remove"
                             | _ :: ys -> FunctionFrame (ys)
@@ -393,7 +393,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       | S.Expr e ->
         let (_, sigma') = eval sigma e f in
         sigma'
-      | S.Block l -> stm_list l sigma f
+      | S.Block l -> (let sigma' = Env.addBlock sigma in
+                        let sigma2 = stm_list l sigma' f in
+                            match sigma2 with
+                            | Env.FunctionFrame _ -> Env.removeBlock sigma2
+                            | Env.ReturnFrame _ -> sigma2)
       | S.If (e, s0, s1) ->
         let (v, sigma') = eval sigma e f in
         (match v with
@@ -419,10 +423,19 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       match v with
       | Value.V_Bool false -> sigma'
       | Value.V_Bool true ->
-        let sigma2 = exec_stm s sigma' f in
-        (match sigma2 with
-         | Env.ReturnFrame _ -> sigma2
-         | Env.FunctionFrame _ -> loop e s sigma2 f)
+       ( match s with
+        | S.Block s' -> let sigma2 = Env.addBlock sigma' in
+        let sigma3 = stm_list s' sigma2 f in
+        (match sigma3 with
+         | Env.ReturnFrame _ -> sigma3
+         | Env.FunctionFrame _ -> let sigma4 = loop e s sigma3 f in
+                                    (match sigma4 with
+                                    | Env.FunctionFrame _ ->  Env.removeBlock sigma4
+                                    | Env.ReturnFrame _ -> sigma4))
+        | _ -> let sigma2 = exec_stm s sigma' f in
+              (match sigma2 with
+                 | Env.ReturnFrame _ -> sigma2
+                 | Env.FunctionFrame _ -> loop e s sigma2 f))
       | _ -> failwith "Non-boolean value in while condition"
     
     and loop2 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
