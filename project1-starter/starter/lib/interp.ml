@@ -411,7 +411,8 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       | S.Return None -> Env.newReturnFrame Value.V_None
       | S.For (dec, e1, e2, sl) ->
         (match dec with
-         | S.VarDec l -> exec_stm (S.VarDec l) sigma f |> loop2 e1 e2 sl f
+         | S.VarDec l -> let sigma' = Env.addBlock sigma in
+                        exec_stm (S.VarDec l) sigma' f |> loop3 e1 e2 sl f |> Env.removeBlock
          | S.Expr exp ->
            (match exp with
             | E.Assign (_, _) -> let (_, sigma') = eval sigma exp f in loop2 e1 e2 sl f sigma'
@@ -438,18 +439,61 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
                  | Env.FunctionFrame _ -> loop e s sigma2 f))
       | _ -> failwith "Non-boolean value in while condition"
     
+(*    and loop3 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t = *)
+(*      let (v, sigma') = eval sigma e f in *)
+(*      match v with *)
+(*      | Value.V_Bool false -> sigma' *)
+(*      | Value.V_Bool true -> *)
+(*        let sigma2 = exec_stm s sigma' f in *)
+(*        (match sigma2 with *)
+(*         | Env.ReturnFrame _ -> sigma2 *)
+(*         | Env.FunctionFrame _ -> *)
+(*           let (_, sigma3) = eval sigma2 incr f in *)
+(*           loop3 e incr s f sigma3) *)
+(*      | _ -> failwith "Non-boolean value in for loop condition" *)
+
+    and loop3 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
+    let (v, sigma') = eval sigma e f in
+          match v with
+          | Value.V_Bool false -> sigma'
+          | Value.V_Bool true ->
+           ( match s with
+            | S.Block s' -> let sigma2 = sigma' in
+            let sigma3 = stm_list s' sigma2 f in
+            (match sigma3 with
+             | Env.ReturnFrame _ -> sigma3
+             | Env.FunctionFrame _ -> let (_,sigma3') = eval sigma3 incr f in
+                                        let sigma4 = loop3 e incr s f sigma3' in
+                                        (match sigma4 with
+                                        | Env.FunctionFrame _ ->  sigma4
+                                        | Env.ReturnFrame _ -> sigma4))
+            | _ -> let sigma2 = exec_stm s sigma' f in
+                  (match sigma2 with
+                     | Env.ReturnFrame _ -> sigma2
+                     | Env.FunctionFrame _ -> loop3 e incr s f sigma2))
+          | _ -> failwith "Non-boolean value in while condition"
+
     and loop2 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
-      let (v, sigma') = eval sigma e f in
-      match v with
-      | Value.V_Bool false -> sigma'
-      | Value.V_Bool true ->
-        let sigma2 = exec_stm s sigma' f in
-        (match sigma2 with
-         | Env.ReturnFrame _ -> sigma2
-         | Env.FunctionFrame _ ->
-           let (_, sigma3) = eval sigma2 incr f in
-           loop2 e incr s f sigma3)
-      | _ -> failwith "Non-boolean value in for loop condition"
+    let (v, sigma') = eval sigma e f in
+          match v with
+          | Value.V_Bool false -> sigma'
+          | Value.V_Bool true ->
+           ( match s with
+            | S.Block s' -> let sigma2 = Env.addBlock sigma' in
+            let sigma3 = stm_list s' sigma2 f in
+            (match sigma3 with
+             | Env.ReturnFrame _ -> sigma3
+             | Env.FunctionFrame _ -> let (_,sigma3') = eval sigma3 incr f in
+                                        let sigma4 = loop2 e incr s f sigma3' in
+                                        (match sigma4 with
+                                        | Env.FunctionFrame _ ->  Env.removeBlock sigma4
+                                        | Env.ReturnFrame _ -> sigma4))
+            | _ -> let sigma2 = exec_stm s sigma' f in
+                  (match sigma2 with
+                     | Env.ReturnFrame _ -> sigma2
+                     | Env.FunctionFrame _ -> loop2 e incr s f sigma2))
+          | _ -> failwith "Non-boolean value in while condition"
+
     
     and stm_list (ss : S.t list) (sigma : Env.t) (f : Fun.t) : Env.t =
       match ss with
