@@ -1,0 +1,10 @@
+function main () {
+    var i=0;
+
+    {
+        var i = 1;
+        print_int(i);
+    }
+    
+    print_int(i);
+}

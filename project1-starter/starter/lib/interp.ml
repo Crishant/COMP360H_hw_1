@@ -303,6 +303,7 @@ module Fun = struct
 
 end
 
+(*binop function which evaluates all binop expressions*)
 let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   match (op, v, v') with
   | (E.Plus, Value.V_Int n, Value.V_Int n') -> Value.V_Int (n + n')
@@ -393,11 +394,11 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       | S.Expr e ->
         let (_, sigma') = eval sigma e f in
         sigma'
-      | S.Block l -> (let sigma' = Env.addBlock sigma in
-                        let sigma2 = stm_list l sigma' f in
-                            match sigma2 with
-                            | Env.FunctionFrame _ -> Env.removeBlock sigma2
-                            | Env.ReturnFrame _ -> sigma2)
+      | S.Block l -> (let sigma' = Env.addBlock sigma in 
+                      let sigma2 = stm_list l sigma' f in
+                        match sigma2 with 
+                        | Env.FunctionFrame _ -> Env.removeBlock sigma2
+                        | Env.ReturnFrame _ -> sigma2)
       | S.If (e, s0, s1) ->
         let (v, sigma') = eval sigma e f in
         (match v with
