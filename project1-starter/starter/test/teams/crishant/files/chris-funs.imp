@@ -1,0 +1,9 @@
+function main() {
+    var a = test();
+    print_int(a);
+    return;
+}
+
+function test() {
+    return 7;
+}

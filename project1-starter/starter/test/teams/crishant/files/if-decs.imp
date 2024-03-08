@@ -17,7 +17,8 @@ function main () {
     } else {
         print_str("nope");
     }
-    if z%x = y then {
+    if z%x == y then {
         print_str("yes");
     }
+    return ;
 }
