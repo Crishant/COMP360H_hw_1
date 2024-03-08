@@ -3,3 +3,9 @@
   "input" : [],
   "output": ["3", "4", "0", "1", "2"]
 }
+
+{
+  "file" : "nish-for-02.imp",
+  "input" : [],
+  "output": ["3"]
+}

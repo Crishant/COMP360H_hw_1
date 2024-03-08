@@ -440,8 +440,14 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
          then increments identifier. If first expression is true, then the body is executed.*)
       | S.For (dec, e1, e2, sl) ->
         (match dec with
-         | S.VarDec l -> let sigma' = Env.addBlock sigma in
-                        exec_stm (S.VarDec l) sigma' f |> loop3 e1 e2 sl f |> Env.removeBlock
+         | S.VarDec l ->(let sigma' = Env.addBlock sigma in
+                        let sigma2 = exec_stm (S.VarDec l) sigma' f  in
+                        let sigma3 = loop3 e1 e2 sl f sigma2 in
+                         (match sigma3 with
+                          | Env.ReturnFrame _ ->  sigma3
+                          | Env.FunctionFrame _ -> Env.removeBlock sigma3
+                        ))
+
          | S.Expr exp ->
            (match exp with
             | E.Assign (_, _) -> let (_, sigma') = eval sigma exp f in loop2 e1 e2 sl f sigma'
