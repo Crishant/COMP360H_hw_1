@@ -1,0 +1,26 @@
+function main() {
+  var a ;
+  var b ;
+  var c = 0;
+
+  a = prompt_int("Enter a: ");
+  b = prompt_int("Enter b: ");
+
+  if a < 0 then {
+    print_str("a not postive int");
+    a = 5;
+  }
+
+  if (b < a) || (b > 10) then {
+    c = a - b;
+  }
+
+  while a != 0 do {
+    c = c + 1;
+    a = a - 1;
+  }
+
+  print_int(c);
+
+  return ;
+}

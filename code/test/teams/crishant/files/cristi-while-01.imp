@@ -1,0 +1,12 @@
+function main() {
+    var x = 5;
+    var y = 1;
+    
+    while x >= 0 do {
+        x = x - 1;
+        y = y + 1;
+    }
+
+    print_int(y);
+    return;
+}

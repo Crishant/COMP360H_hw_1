@@ -1,0 +1,16 @@
+function main() {
+  var a;
+  var b;
+  var y; 
+
+  a = prompt_int("Enter a number: ") ;
+  b = prompt_int("Enter another number: ") ;
+
+  if (b > 0) && (a > 0) then {
+    y = a % b ;
+  } else {
+    y = a * b;
+  }
+  print_int(y) ;
+  return ;
+}

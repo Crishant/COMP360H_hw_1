@@ -1,0 +1,16 @@
+function main() {
+    var x;
+    var y;
+    var z;
+    var t;
+
+    var z = "nuts";
+    var y = 3;
+    var t = false;
+
+    print_str(z);
+    print_int(y);
+    print_bool(t);
+
+    return;
+}

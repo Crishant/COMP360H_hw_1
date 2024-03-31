@@ -1,0 +1,10 @@
+{
+    "file": "if-decs.imp",
+    "input": ["4","3","12"],
+    "output": ["false", "nope"]
+}
+{
+    "file" : "if-decs.imp",
+    "input" : ["8","4", "12"],
+    "output" : ["false", "69", "yes"]
+}

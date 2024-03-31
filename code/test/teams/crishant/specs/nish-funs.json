@@ -1,0 +1,11 @@
+{
+  "file" : "nish-fun-01.imp",
+  "input" : [],
+  "output" : ["5", "6", "5"]
+}
+
+{
+  "file" : "nish-fun-02.imp",
+  "input" : [],
+  "output" : ["78", "6", "0"]
+}

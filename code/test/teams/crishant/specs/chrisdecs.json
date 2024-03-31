@@ -1,0 +1,22 @@
+{
+    "file": "eqdecs.imp",
+    "input": ["1", "2", "5"],
+    "output": ["2", "true", "false", "false"]
+}
+
+{
+    "file" : "01chrisdecs.imp",
+    "input": [],
+    "output": ["true", "false", "false", "true"]
+}
+
+{
+    "file" : "02chrisdecs.imp",
+    "input" : ["12", "5"],
+    "output" : []
+}
+{
+    "file" : "03decs.imp",
+    "input" : [],
+    "output" : ["hello", "true", "2"]
+}

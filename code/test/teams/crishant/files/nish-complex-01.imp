@@ -1,0 +1,27 @@
+function main() {
+
+  var a ;
+  var b ;
+  var c ;
+
+  a = prompt_int("Enter a: ") ;
+  b = prompt_int("Enter b: ") ;
+  c = prompt_int("Enter c: ") ;
+
+  while (a >= b) && (c != 5 || c != 69) && (a != (c+89)) do {
+    a = a + 1;
+    b = b + 10;
+    c = c + 100;
+    if a - b <= 2 then {
+    print_bool(true);
+    return;
+    }
+    print_int(a);
+    print_int(b);
+    print_int(c);
+  }
+
+  print_bool(false);
+
+  return ;
+}

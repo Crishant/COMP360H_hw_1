@@ -1,0 +1,9 @@
+function main () {
+    var x = 0;
+    for(var i = 0; i < 2; i = i + 1){
+        x = x + 1;
+    }
+    print_int(x);
+
+    return;
+}

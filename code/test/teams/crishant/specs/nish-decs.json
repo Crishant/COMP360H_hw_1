@@ -1,0 +1,19 @@
+{
+  "file" : "nish-dec-01.imp",
+  "input" : [],
+  "output" : ["5"]
+}
+
+{
+  "file" : "nish-dec-02.imp",
+  "input" : [],
+  "output" : ["2", "2"]
+}
+
+{
+  "file" : "nish-dec-03.imp",
+  "input" : [],
+  "output" : ["5"]
+}
+
+

@@ -1,0 +1,77 @@
+{
+  "file" : "nish-while-01.imp",
+  "input" : ["5","6"],
+  "output" : ["6"]
+}
+
+{
+  "file" : "nish-while-01.imp",
+  "input" : ["7","6"],
+  "output" : []
+}
+
+{
+  "file" : "nish-while-01.imp",
+  "input" : ["6","6"],
+  "output" : []
+}
+
+{
+  "file" : "nish-while-01.imp",
+  "input" : ["1","6"],
+  "output" : ["2", "3", "4", "5", "6"]
+}
+
+{
+  "file" : "nish-while-02.imp",
+  "input" : ["1","6"],
+  "output" : ["8"]
+}
+
+{
+  "file" : "nish-while-02.imp",
+  "input" : ["4","5"],
+  "output" : ["5", "8"]
+}
+
+
+{
+  "file" : "nish-while-02.imp",
+  "input" : ["5","5"],
+  "output" : ["5", "8"]
+}
+
+
+{
+  "file" : "nish-while-02.imp",
+  "input" : ["7","6"],
+  "output" : []
+}
+
+
+{
+  "file" : "nish-while-03.imp",
+  "input" : ["2","8", "9"],
+  "output" : ["9", "2", "8", "7", "9", "2"]
+}
+
+
+{
+  "file" : "nish-while-03.imp",
+  "input" : ["10","8", "9"],
+  "output" : []
+}
+
+
+{
+  "file" : "nish-while-03.imp",
+  "input" : ["2","8", "-1"],
+  "output" : []
+}
+
+
+{
+  "file" : "nish-while-03.imp",
+  "input" : ["3","8", "4"],
+  "output" : ["4", "3", "8", "1", "4", "3"]
+}

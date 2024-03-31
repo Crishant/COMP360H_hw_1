@@ -1,0 +1,28 @@
+function main() {
+
+  var a ;
+  var b ;
+  var c ;
+
+  a = helper() ;
+  b = helper_2() ;
+  c = helper_3(a,b) ;
+
+  print_int(a);
+  print_int(b);
+  print_int(c);
+
+  return ;
+}
+
+function helper() {
+    return 5;
+}
+
+function helper_2() {
+    return 6;
+}
+
+function helper_3(a, b) {
+    return a;
+}

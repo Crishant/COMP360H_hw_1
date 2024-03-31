@@ -1,0 +1,8 @@
+function main() {
+  var x = 2, y = 2;
+
+  print_int(x) ;
+  print_int(y) ;
+
+  return ;
+}

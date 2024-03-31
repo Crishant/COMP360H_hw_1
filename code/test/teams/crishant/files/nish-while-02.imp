@@ -1,0 +1,23 @@
+
+function main() {
+
+  var a ;
+  var b ;
+
+  a = prompt_int("Enter a: ") ;
+  b = prompt_int("Enter b: ") ;
+
+  while (a==b) || (a<b) do {
+    var a;
+    a = b ;
+    b = b + 1;
+
+    if b == 7 then {
+        a = 8;
+    }
+
+    print_int(a) ;
+  }
+
+  return ;
+}

@@ -1,0 +1,12 @@
+function main() {
+    var x = 3;
+
+    if x < 4 then{
+        while x != 1 do{
+            x = x - 1;
+        }
+    }
+    
+    print_int(x);
+    return;
+}

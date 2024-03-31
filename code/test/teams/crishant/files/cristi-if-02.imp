@@ -1,0 +1,13 @@
+function main() {
+    var x = 5;
+
+    if (x <= 6) then{
+        if x == 5 then{
+            print_str("success");
+        } 
+    } else {
+        print_str("failure");
+    }
+
+    return;
+}

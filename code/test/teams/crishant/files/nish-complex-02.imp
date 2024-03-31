@@ -1,0 +1,32 @@
+function main() {
+
+  var a ;
+  var b ;
+  var c ;
+
+
+  while (true) do {
+
+    a = prompt_int("Enter a: ") ;
+    b = prompt_int("Enter b: ") ;
+    c = prompt_int("Enter c: ") ;
+
+    if a - b <= 2 then {
+        print_bool (true);
+        return;
+    }
+    else {
+       if c < 100 then {
+            print_int(80085);
+       }
+       else {
+            skip;
+       }
+    }
+
+    print_int(a);
+    print_int(b);
+    print_int(c);
+  }
+  return;
+}

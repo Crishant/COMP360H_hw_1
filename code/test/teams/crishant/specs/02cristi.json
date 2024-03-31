@@ -1,0 +1,79 @@
+{
+    "file" : "cristi-io-01.imp",
+    "input" : ["4","5"],
+    "output" : ["4"]
+}
+
+{
+    "file" : "cristi-io-01.imp",
+    "input" : ["10","8"],
+    "output" : ["2"]
+}
+
+{
+    "file" : "cristi-io-01.imp",
+    "input" : ["2","3"],
+    "output" : ["2"]
+}
+
+{
+    "file" : "cristi-io-01.imp",
+    "input" : ["4","-1"],
+    "output" : ["-4"]
+}
+
+{
+    "file" : "cristi-io-01.imp",
+    "input" : ["-1","-1"],
+    "output" : ["1"]
+}
+
+{
+    "file" : "cristi-io-02.imp",
+    "input" : ["-1","6"],
+    "output" : ["a not postive int","5"]
+}
+
+{
+    "file" : "cristi-io-02.imp",
+    "input" : ["4","3"],
+    "output" : ["5"]
+}
+
+{
+    "file" : "cristi-io-02.imp",
+    "input" : ["0","-3"],
+    "output" : ["3"]
+}
+
+{
+    "file" : "cristi-io-02.imp",
+    "input" : ["12","11"],
+    "output" : ["13"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["2","3"],
+    "output" : ["3"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["0","-2"],
+    "output" : ["-2"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["0","0"],
+    "output" : ["0"]
+}
+
+{
+    "file" : "cristi-io-03.imp",
+    "input" : ["100","99"],
+    "output" : ["99"]
+}
+
+

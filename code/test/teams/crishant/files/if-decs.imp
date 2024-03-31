@@ -1,0 +1,24 @@
+function main () {
+    var x;
+    var y;
+    var z;
+    x = prompt_int("enter x: ");
+    y = prompt_int("enter y: ");
+    z = prompt_int("enter z: ");
+
+    if x == y then {
+        print_bool(true);
+    } else {
+        print_bool(false);
+    }
+
+    if 2*x - y == z then {
+        print_int(69);
+    } else {
+        print_str("nope");
+    }
+    if z%x == y then {
+        print_str("yes");
+    }
+    return ;
+}

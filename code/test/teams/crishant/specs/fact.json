@@ -1,0 +1,5 @@
+{
+    "file": "chrisfact.imp",
+    "input" : ["5"],
+    "output" : ["120"]
+}

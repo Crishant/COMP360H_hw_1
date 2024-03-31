@@ -1,0 +1,27 @@
+function main() {
+    var a;
+    var b;
+    var c;
+
+    a = prompt_int("Enter a: ");
+    b = prompt_int("Enter b: ");
+    c = prompt_int("Enter c; ");
+
+    if a < b then {
+        print_int(b);
+    } else {
+        print_int(a);
+    }
+
+    if a == c then {
+        print_str("equal");
+    }
+
+    var d = a < b;
+    var e = a > c;
+    var f = a == b;
+
+    print_bool(d);
+    print_bool(e);
+    print_bool(f);
+}

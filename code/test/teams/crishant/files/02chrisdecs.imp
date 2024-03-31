@@ -1,0 +1,17 @@
+function main() {
+    var a;
+    var b;
+
+   a= prompt_int("enter a: ");
+   b = prompt_int("enter b: ");
+
+   var c = a * b;
+   var d = a % b;
+   var e = c / d;
+
+   if e == d then {
+    print_str("this will never be true");
+   } else {
+    skip;
+   }
+}
