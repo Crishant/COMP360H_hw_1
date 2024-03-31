@@ -242,7 +242,10 @@ module IdMap = Map.Make(Ast.Id)
               | ReturnFrame _ -> failwith @@ "Variable Declaration in a Return Frame"
               | FunctionFrame currFrame' -> match currFrame' with
                                               | [] -> failwith @@ "VarDec in EmptyFrame"
-                                              | y :: ys -> FunctionFrame ((IdMap.add x v y) :: ys)
+                                              | y :: ys -> if IdMap.mem x y then
+                                                                 raise @@ MultipleDeclaration x
+                                                           else
+                                                                 FunctionFrame ((IdMap.add x v y) :: ys)
       (*FUNCTION: Adds a new environment frame to the stack of environment frames*)
       let addBlock (currFrame : t) : t =
             match currFrame with
@@ -289,7 +292,7 @@ module Fun = struct
     (*FUNCTION: Calls top function with a given program on an empty module*)
     let collectFun (l : Ast.Program.fundef list) : t =
         collectFun l FunMap.empty
-    
+
     (*FUNCTION: Given a map and a given function identifier, returns the params and body of function in the map with the corresponding identifier*)
     let findFunc (funMap : t) (x : Ast.Id.t) : (Ast.Id.t list * S.t list) option =
         try
@@ -328,15 +331,15 @@ let binop (op : E.binop) (v : Value.t) (v' : Value.t) : Value.t =
   | (E.Ne, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n <> n')
   | (E.Lt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n < n')
   | (E.Gt, Value.V_Int n, Value.V_Int n') -> Value.V_Bool(n > n')
-  | _ -> failwith @@ "Something went Wrong!"
+  | _ -> raise (TypeError ("Arg 1: " ^ Value.to_string v ^ "Arg 2:" ^ Value.to_string v' ^ "Operator: Unknown"))
 
 (*HELPER: given a list of identifiers and values, returns list of tuples with identifier and value*)
-let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list = 
-  match l1, l2 with 
+let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list =
+  match l1, l2 with
   | [],[] -> []
   | x::xs, y::ys -> (x, y) :: zip xs ys
   | _ -> failwith @@ "No lists"
-  
+
   (* FUNCTION eval (recursive): Evaluates Expressions. Takes in environment sigma, expression e and function t (for Call) and returns the expression's value and updated environment. *)
   let rec eval (sigma : Env.t) (e : E.t) (f: Fun.t) : Value.t * Env.t =
     match e with
@@ -370,25 +373,28 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
       (match v with
        | Value.V_Int n -> (Value.V_Int (-n), sigma')
        | _ -> failwith "Type Error")
-    (*CALL MATCH: Given a list of expressions, evaluates all expressions. Then matches given function identifier and returns list of params and the body. 
+    (*CALL MATCH: Given a list of expressions, evaluates all expressions. Then matches given function identifier and returns list of params and the body.
        Zips param identifiers with values from expression list, and executes body in a new frame*)
     | E.Call (func, l) ->
       let (vl, sigma') = eval_all l sigma f in
-      match Fun.findFunc f func with
-      | None -> let v = Api.do_call func vl in
-                (v, sigma')
+      (match Fun.findFunc f func with
+      | None -> (try
+                    let v = Api.do_call func vl in
+                    (v, sigma')
+                with
+                    | _ -> raise @@ UndefinedFunction func)
       | Some (xl, sl) ->
       let xvl = zip xl vl in
       let sigma2 = Fun.initFun xvl in
       (match exec_stm (S.Block sl) sigma2 f with
        | ReturnFrame v -> (v, sigma')
-       | _ -> failwith "Not a return frame")
+       | _ -> failwith "Not a return frame"))
 
   (*HELPER: Given a list of expressions and an environment, returns list of values from expressions and updated environment frame*)
-  and eval_all(el: E.t list) (sigma: Env.t) (f: Fun.t) : Value.t list * Env.t = 
-  match el with 
+  and eval_all(el: E.t list) (sigma: Env.t) (f: Fun.t) : Value.t list * Env.t =
+  match el with
   | [] -> ([], sigma)
-  | x :: xs -> 
+  | x :: xs ->
     let (v, sigma') = eval sigma x f  in
     let (vs, sigma2) = eval_all xs sigma' f in
     (v::vs, sigma2)
@@ -404,13 +410,13 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
          | [] -> sigma
          | (var, e) :: xs ->
           match e with
-          | Some e' -> 
+          | Some e' ->
             let (v, sigma') = eval sigma e' f in
             let sigma2 = Env.newVarDec sigma' var v in
             exec_stm (S.VarDec xs) sigma2 f
           | None -> let sigma' = Env.newVarDec sigma var Value.V_Undefined in
             exec_stm (S.VarDec xs) sigma' f)
-      (* Evaluates expression within statement. *)      
+      (* Evaluates expression within statement. *)
       | S.Expr e ->
         let (_, sigma') = eval sigma e f in
         sigma'
@@ -427,7 +433,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
         (match v with
          | Value.V_Bool true -> exec_stm s0 sigma' f
          | Value.V_Bool false -> exec_stm s1 sigma' f
-         | _ -> failwith "Non-boolean value in if condition")
+         | _ -> raise (TypeError "Non-boolean value in if condition"))
       (*WHILE MATCH: Given an expression and a body, evaluates expression and continues to evaluate body until expression returns false*)
       | S.While (e, s) -> loop e s sigma f
       (* Return case with value from expression e. Calls helper function to create a return frame with value v. *)
@@ -448,7 +454,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
             | _ -> failwith "Invalid expression in for loop")
          | _ -> failwith "Invalid for loop declaration")
     (*HELPER: For while loops. Evaluates given expression under the environment frame. If false then returns updated frame. If true then adds a new environment frame onto frame stack.
-       Then checks evaluates the block. If a return frame is given, we return said return frame. Else, we evaluate the loop again. After finished, we remove top 
+       Then checks evaluates the block. If a return frame is given, we return said return frame. Else, we evaluate the loop again. After finished, we remove top
        environment frame or return return frame.*)
     and loop (e : E.t) (s : S.t) (sigma : Env.t) (f : Fun.t) : Env.t =
       let (v, sigma') = eval sigma e f in
@@ -468,8 +474,8 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
               (match sigma2 with
                  | Env.ReturnFrame _ -> sigma2
                  | Env.FunctionFrame _ -> loop e s sigma2 f))
-      | _ -> failwith "Non-boolean value in while condition"
-    
+      | _ -> raise (TypeError "Non-boolean value in while condition")
+
     (*HELPER: For for loops. Used for case when first statement given in for loop is an identifier declaration. Similar structure to that of While loops*)
     and loop3 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
     let (v, sigma') = eval sigma e f in
@@ -490,7 +496,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
                   (match sigma2 with
                      | Env.ReturnFrame _ -> sigma2
                      | Env.FunctionFrame _ -> loop3 e incr s f sigma2))
-          | _ -> failwith "Non-boolean value in while condition"
+          | _ -> raise (TypeError "Non-boolean value in while condition")
     (*HELPER: For for loops. Used for when given statement in for loop is an expression assignment. Folllows similar structure to while loops.*)
     and loop2 (e : E.t) (incr : E.t) (s : S.t) (f : Fun.t) (sigma : Env.t): Env.t =
     let (v, sigma') = eval sigma e f in
@@ -511,7 +517,7 @@ let rec zip (l1 : Ast.Id.t list) (l2 : Value.t list) : (Ast.Id.t * Value.t) list
                   (match sigma2 with
                      | Env.ReturnFrame _ -> sigma2
                      | Env.FunctionFrame _ -> loop2 e incr s f sigma2))
-          | _ -> failwith "Non-boolean value in while condition"
+          | _ -> raise (TypeError "Non-boolean value in while condition")
 
     (*HELPER: Given list of statements, evalates each statement under environment given and updated.*)
     and stm_list (ss : S.t list) (sigma : Env.t) (f : Fun.t) : Env.t =
